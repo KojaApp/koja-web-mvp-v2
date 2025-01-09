@@ -1,5 +1,6 @@
 import { sql } from '@vercel/postgres';
 import {
+  ChildField,
   CustomerField,
   CustomersTableType,
   InvoiceForm,
@@ -176,6 +177,24 @@ export async function fetchCustomers() {
 
     const customers = data.rows;
     return customers;
+  } catch (err) {
+    console.error('Database Error:', err);
+    throw new Error('Failed to fetch all customers.');
+  }
+}
+
+export async function fetchChildren() {
+  try {
+    const data = await sql<ChildField>`
+      SELECT
+        child_id,
+        child_name
+      FROM children
+      ORDER BY child_name ASC
+    `;
+
+    const children = data.rows;
+    return children;
   } catch (err) {
     console.error('Database Error:', err);
     throw new Error('Failed to fetch all customers.');

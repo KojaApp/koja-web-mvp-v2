@@ -16,6 +16,13 @@ export type Customer = {
   image_url: string;
 };
 
+export type Child = {
+  child_id: string;
+  child_name: string;
+  email: string;
+  image_url: string;
+};
+
 export type Invoice = {
   id: string;
   customer_id: string;
@@ -78,6 +85,11 @@ export type FormattedCustomersTable = {
 export type CustomerField = {
   id: string;
   name: string;
+};
+
+export type ChildField = {
+  child_id: string;
+  child_name: string;
 };
 
 export type InvoiceForm = {

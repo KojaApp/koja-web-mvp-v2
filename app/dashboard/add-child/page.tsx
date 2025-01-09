@@ -1,28 +1,28 @@
 //import Form from '@/app/ui/invoices/create-form';//
-import Form from '@/app/ui/invoices/create-form-copy';
+import AddChildForm from '@/app/ui/add-child/add-child-form';
 import Breadcrumbs from '@/app/ui/invoices/breadcrumbs';
 //import { fetchCustomers } from '@/app/lib/data';//
-import { fetchChildren } from '@/app/lib/data';
+// import { fetchChildren } from '@/app/lib/data';
  
 //export default async function Page() { //
   // const customers = await fetchCustomers(); //
 
   export default async function Page() { 
-  const children = await fetchChildren(); 
+  // const children = await fetchChildren(); 
  
   return (
     <main>
       <Breadcrumbs
         breadcrumbs={[
-          { label: 'Invoices', href: '/dashboard/invoices' },
+          { label: 'Children', href: '/dashboard' },
           {
-            label: 'Create Invoice',
-            href: '/dashboard/invoices/create',
+            label: 'Add Child',
+            href: '/dashboard/add-child',
             active: true,
           },
         ]}
       />
-      <Form children={children} />
+      <AddChildForm />
     </main>
   );
 }
