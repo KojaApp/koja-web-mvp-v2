@@ -1,5 +1,6 @@
 import { sql } from '@vercel/postgres';
 import {
+  ChildField,
   CustomerField,
   CustomersTableType,
   InvoiceForm,
@@ -31,9 +32,9 @@ export async function fetchRevenue() {
 export async function fetchLatestInvoices() {
   try {
     const data = await sql<LatestInvoiceRaw>`
-      SELECT invoices.amount, customers.name, customers.image_url, customers.email, invoices.id
+      SELECT invoices.amount, children.child_name, children.image_url, invoices.id
       FROM invoices
-      JOIN customers ON invoices.customer_id = customers.id
+      JOIN children ON invoices.child_id = children.child_id
       ORDER BY invoices.date DESC
       LIMIT 5`;
 
@@ -97,14 +98,13 @@ export async function fetchFilteredInvoices(
         invoices.amount,
         invoices.date,
         invoices.status,
-        customers.name,
-        customers.email,
-        customers.image_url
+        invoices.child_id,
+        children.child_name,
+        children.image_url
       FROM invoices
-      JOIN customers ON invoices.customer_id = customers.id
+      JOIN children ON invoices.child_id = children.child_id
       WHERE
-        customers.name ILIKE ${`%${query}%`} OR
-        customers.email ILIKE ${`%${query}%`} OR
+        children.child_name ILIKE ${`%${query}%`} OR
         invoices.amount::text ILIKE ${`%${query}%`} OR
         invoices.date::text ILIKE ${`%${query}%`} OR
         invoices.status ILIKE ${`%${query}%`}
@@ -177,6 +177,24 @@ export async function fetchCustomers() {
 
     const customers = data.rows;
     return customers;
+  } catch (err) {
+    console.error('Database Error:', err);
+    throw new Error('Failed to fetch all customers.');
+  }
+}
+
+export async function fetchChildren() {
+  try {
+    const data = await sql<ChildField>`
+      SELECT
+        child_id,
+        child_name
+      FROM children
+      ORDER BY child_name ASC
+    `;
+
+    const children = data.rows;
+    return children;
   } catch (err) {
     console.error('Database Error:', err);
     throw new Error('Failed to fetch all customers.');

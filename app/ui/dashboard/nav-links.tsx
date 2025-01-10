@@ -19,7 +19,7 @@ const links = [
   { name: 'Home', href: '/dashboard', icon: HomeIcon },
   {name: 'Invoices', href: '/dashboard/invoices',icon: DocumentDuplicateIcon,},
   { name: 'Payments', href: '/dashboard/payments', icon: CurrencyPoundIcon },
-  { name: 'Your Details', href: '/dashboard/club', icon: DocumentMagnifyingGlassIcon },
+  { name: 'Your Details', href: '/dashboard/details', icon: DocumentMagnifyingGlassIcon },
   { name: 'KojaClub', href: '/dashboard/club', icon: ReceiptPercentIcon },
 ];
 
