@@ -35,7 +35,7 @@ export async function fetchLatestInvoices() {
       SELECT invoices.amount, children.child_name, children.image_url, invoices.id
       FROM invoices
       JOIN children ON invoices.child_id = children.child_id
-      ORDER BY invoices.date DESC
+      ORDER BY invoices.due_date DESC
       LIMIT 5`;
 
     const latestInvoices = data.rows.map((invoice) => ({
@@ -109,7 +109,7 @@ export async function fetchFilteredInvoices(
         invoices.amount::text ILIKE ${`%${query}%`} OR
         invoices.due_date::text ILIKE ${`%${query}%`} OR
         invoices.status ILIKE ${`%${query}%`}
-      ORDER BY invoices.date DESC
+      ORDER BY invoices.due_date DESC
       LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}
     `;
 
