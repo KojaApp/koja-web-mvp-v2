@@ -96,9 +96,10 @@ export async function fetchFilteredInvoices(
       SELECT
         invoices.invoice_id,
         invoices.amount,
-        invoices.date,
+        invoices.due_date,
         invoices.status,
         invoices.child_id,
+        invoices.name,
         children.child_name,
         children.image_url
       FROM invoices
@@ -106,7 +107,7 @@ export async function fetchFilteredInvoices(
       WHERE
         children.child_name ILIKE ${`%${query}%`} OR
         invoices.amount::text ILIKE ${`%${query}%`} OR
-        invoices.date::text ILIKE ${`%${query}%`} OR
+        invoices.due_date::text ILIKE ${`%${query}%`} OR
         invoices.status ILIKE ${`%${query}%`}
       ORDER BY invoices.date DESC
       LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}
@@ -128,7 +129,7 @@ export async function fetchInvoicesPages(query: string) {
       customers.name ILIKE ${`%${query}%`} OR
       customers.email ILIKE ${`%${query}%`} OR
       invoices.amount::text ILIKE ${`%${query}%`} OR
-      invoices.date::text ILIKE ${`%${query}%`} OR
+      invoices.due_date::text ILIKE ${`%${query}%`} OR
       invoices.status ILIKE ${`%${query}%`}
   `;
 
