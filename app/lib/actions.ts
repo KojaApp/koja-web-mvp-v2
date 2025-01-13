@@ -36,6 +36,22 @@ const AddingChild = z.object({
   }),
 });
 
+const AddingInvoice = z.object({
+  childId: z.string({
+    invalid_type_error: 'Please select a child.',
+  }),
+  amount: z.string({
+    invalid_type_error: 'Please enter an amount.',
+  }),
+  status: z.string({
+    invalid_type_error: 'Please set a status.',
+  }),
+    dueDate: z.string({
+      invalid_type_error: 'Please set a due date.',  
+    
+  }),
+});
+
 export async function register(
   prevState: string | null,
   formData: FormData,
@@ -94,6 +110,40 @@ export async function authenticate(
     throw error;
   }
 }
+
+export async function addInvoice(prevState: string | null, formData: FormData) {
+  const validatedFields = AddingInvoice.safeParse({
+    childId: formData.get('childId'),
+    amount: formData.get('amount'),
+    status: formData.get('status'),
+    dueDate: formData.get('dueDate'),
+  });
+
+  if (!validatedFields.success) {
+    console.error("Validation Errors:", validatedFields.error.errors);
+    return "Missing Fields. Failed to Add Invoice.";
+  }
+
+  const { childId, amount, status, dueDate } = validatedFields.data;
+  const invoiceId = uuidv4();
+  const createdDate = new Date().toISOString(); // Current date in ISO format
+
+  console.log("Attempting to insert invoice:", { invoiceId, childId, amount, status, dueDate, createdDate });
+
+  try {
+    await sql`
+      INSERT INTO invoices (invoice_id, child_id, amount, status, created_date, due_date)
+      VALUES (${invoiceId}, ${childId}, ${amount}, ${status}, ${createdDate}, ${dueDate})
+    `;
+    console.log("Invoice successfully added:", { invoiceId, childId, amount, status, createdDate, dueDate });
+  } catch (error) {
+    console.error("Database Error:", error);
+    return "Database Error: Failed to Add Invoice.";
+  }
+
+  redirect('/dashboard/invoices');
+}
+
 
 export async function addChild(prevState: string | null, formData: FormData) {
   const validatedFields = AddingChild.safeParse({
