@@ -125,17 +125,30 @@ export async function addInvoice(prevState: string | null, formData: FormData) {
   }
 
   const { childId, amount, status, dueDate } = validatedFields.data;
-  const invoiceId = uuidv4();
-  const createdDate = new Date().toISOString(); // Current date in ISO format
+  const childName = formData.get('childName');
 
-  console.log("Attempting to insert invoice:", { invoiceId, childId, amount, status, dueDate, createdDate });
+  if (!childName) {
+    console.error("Validation Error: Missing child's name.");
+    return "Missing child's name. Failed to Add Invoice.";
+  }
+
+  const invoiceId = uuidv4();
+  const createdDate = new Date().toISOString();
 
   try {
     await sql`
-      INSERT INTO invoices (invoice_id, child_id, amount, status, created_date, due_date)
-      VALUES (${invoiceId}, ${childId}, ${amount}, ${status}, ${createdDate}, ${dueDate})
+      INSERT INTO invoices (invoice_id, child_id, name, amount, status, created_date, due_date)
+      VALUES (${invoiceId}, ${childId}, ${childName}, ${amount}, ${status}, ${createdDate}, ${dueDate})
     `;
-    console.log("Invoice successfully added:", { invoiceId, childId, amount, status, createdDate, dueDate });
+    console.log("Invoice successfully added:", {
+      invoiceId,
+      childId,
+      childName,
+      amount,
+      status,
+      createdDate,
+      dueDate,
+    });
   } catch (error) {
     console.error("Database Error:", error);
     return "Database Error: Failed to Add Invoice.";
@@ -143,6 +156,8 @@ export async function addInvoice(prevState: string | null, formData: FormData) {
 
   redirect('/dashboard/invoices');
 }
+
+
 
 
 export async function addChild(prevState: string | null, formData: FormData) {
