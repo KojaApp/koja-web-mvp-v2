@@ -20,7 +20,7 @@ export default function AddInvoiceForm({ children }) {
     <form action={formAction} className="space-y-3">
       <div className="rounded-md bg-gray-50 p-4 md:p-6">
         
-        {/* Child Name */}
+{/* Child Name */}
         <div className="mb-4">
           <label htmlFor="child" className="mb-2 block text-sm font-medium">
             Choose child
@@ -51,8 +51,7 @@ export default function AddInvoiceForm({ children }) {
   name="childName"
   value=""
 />
-
-        </div>
+</div>
 
         {/* Invoice Amount */}
         <div className="mb-4">
