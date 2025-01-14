@@ -1,7 +1,8 @@
 import { Revenue } from './definitions';
 
+
 export const formatCurrency = (amount: number) => {
-  return (amount).toLocaleString('en-US', {
+  return (amount).toLocaleString('en-GB', {
     style: 'currency',
     currency: 'GBP',
   });
@@ -9,7 +10,7 @@ export const formatCurrency = (amount: number) => {
 
 export const formatDateToLocal = (
   dateStr: string,
-  locale: string = 'en-US',
+  locale: string = 'en-GB',
 ) => {
   const date = new Date(dateStr);
   const options: Intl.DateTimeFormatOptions = {
