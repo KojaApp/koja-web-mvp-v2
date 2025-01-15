@@ -6,10 +6,10 @@ import Link from 'next/link';
 import { Button } from '@/app/ui/button';
 
 export default function AddChildFormCopy() {
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<any | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
   const [isPending, setIsPending] = useState(false);
-  const [childId, setChildId] = useState<string | null>(null);  // State for childId
+  const [childId, setChildId] = useState<any | null>(null);  // State for childId
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
