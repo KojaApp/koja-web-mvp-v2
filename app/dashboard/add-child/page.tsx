@@ -1,5 +1,5 @@
 //import Form from '@/app/ui/invoices/create-form';//
-import AddChildFormCopy from '@/app/ui/add-child/add-child-form-copy';
+import AddChildForm from '@/app/ui/add-child/add-child-form';
 import Breadcrumbs from '@/app/ui/invoices/breadcrumbs';
 //import { fetchCustomers } from '@/app/lib/data';//
 // import { fetchChildren } from '@/app/lib/data';
@@ -22,7 +22,7 @@ import Breadcrumbs from '@/app/ui/invoices/breadcrumbs';
           },
         ]}
       />
-      <AddChildFormCopy />
+      <AddChildForm />
     </main>
   );
 }
