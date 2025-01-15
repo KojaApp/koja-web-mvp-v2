@@ -1,13 +1,13 @@
 'use server';
  
 import { signIn } from '@/auth';
-import { AuthError } from 'next-auth';
 import bcrypt from 'bcrypt';
 import {v4 as uuidv4} from "uuid"
 import z from 'zod';
 import { sql } from '@vercel/postgres';
 import { redirect } from 'next/navigation';
 import { getSession } from 'next-auth/react';
+import NextAuth from "next-auth"
 
 const RegisterUser = z.object({
   name: z.string({
@@ -99,17 +99,21 @@ export async function authenticate(
   try {
     await signIn('credentials', formData);
   } catch (error) {
-    if (error instanceof AuthError) {
-      switch (error.type) {
-        case 'CredentialsSignin':
-          return 'Invalid credentials.';
-        default:
-          return 'Something went wrong.';
-      }
+    if (error.code === 'CredentialsSignin') {
+
+      // Display "Incorrect email or password" message
+  
+    } else if (error.code === 'OAuthSignin') {
+  
+      // Display "Error signing in with provider" message
+  
+    } else {
+  
+      // Handle other potential errors
+  
     }
-    throw error;
-  }
-}
+  
+  }}
 
 export async function addInvoice(prevState: string | null, formData: FormData) {
   const validatedFields = AddingInvoice.safeParse({
@@ -189,9 +193,3 @@ export async function addChild(prevState: string | null, formData: FormData) {
     return { success: false, error: "Database Error: Failed to Create Account." };  // Return error object
   }
 }
-
-
-
-
-
-
