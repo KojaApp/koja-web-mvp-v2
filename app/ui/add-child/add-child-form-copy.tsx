@@ -9,6 +9,7 @@ export default function AddChildFormCopy() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
   const [isPending, setIsPending] = useState(false);
+  const [childId, setChildId] = useState<string | null>(null);  // State for childId
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -25,6 +26,7 @@ export default function AddChildFormCopy() {
       if (result.success) {
         setIsSuccess(true);  // Show success if result is success
         setErrorMessage(null);
+        setChildId(result.childId); // Store the childId here
       } else {
         setIsSuccess(false);
         setErrorMessage(result.error);  // Show error if result has error
@@ -36,6 +38,35 @@ export default function AddChildFormCopy() {
       console.error("Error:", error);
     }
     setIsPending(false); // End the pending state
+  };
+
+  // Function to handle TFC linking
+  const handleLinkTfc = async () => {
+    if (!childId) {
+      console.error("Child ID is missing.");
+      return;
+    }
+
+    // Trigger API to link TFC account only when childId exists
+    try {
+      const response = await fetch('/api/dashboard/add-child', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ childId }), // Send the childId in the request body
+      });
+
+      const result = await response.json();
+      if (response.ok) {
+        alert("TFC Account Linked Successfully");
+      } else {
+        alert(`Failed to link TFC Account: ${result.error}`);
+      }
+    } catch (error) {
+      console.error("Error linking TFC account:", error);
+      alert("An unexpected error occurred while linking the TFC account.");
+    }
   };
 
   return (
@@ -91,9 +122,7 @@ export default function AddChildFormCopy() {
       {isSuccess && (
         <div className="text-green-600">
           <p>Child successfully added! You can now link the TFC account.</p>
-          <Button onClick={() => alert("Redirect to TFC Linking")}>
-            Link TFC Account
-          </Button>
+          <Button onClick={handleLinkTfc}>Link TFC Account</Button>
         </div>
       )}
 

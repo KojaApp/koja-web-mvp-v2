@@ -179,16 +179,17 @@ export async function addChild(prevState: string | null, formData: FormData) {
 
   try {
     await sql`
-      INSERT INTO children (child_id, child_name, child_dob, tfc_account_ref)
+      INSERT INTO children (child_id, child_name, child_dob, outbound_child_payment_ref)
       VALUES (${child_id}, ${name}, ${DOB}, ${TFC})
     `;
     console.log("Child successfully added:", { child_id, name, DOB, TFC });
-    return { success: true };  // Ensure this is returned as an object
+    return { success: true, childId: child_id };  // Return childId here
   } catch (error) {
     console.error("Database Error:", error);
     return { success: false, error: "Database Error: Failed to Create Account." };  // Return error object
   }
 }
+
 
 
 
