@@ -169,7 +169,7 @@ export async function addChild(prevState: string | null, formData: FormData) {
 
   if (!validatedFields.success) {
     console.error("Validation Errors:", validatedFields.error.errors);
-    return "Missing Fields. Failed to Create Account.";
+    return { success: false, error: "Missing Fields. Failed to Create Account." };
   }
 
   const { name, DOB, TFC } = validatedFields.data;
@@ -183,10 +183,14 @@ export async function addChild(prevState: string | null, formData: FormData) {
       VALUES (${child_id}, ${name}, ${DOB}, ${TFC})
     `;
     console.log("Child successfully added:", { child_id, name, DOB, TFC });
+    return { success: true };  // Ensure this is returned as an object
   } catch (error) {
     console.error("Database Error:", error);
-    return "Database Error: Failed to Create Account.";
+    return { success: false, error: "Database Error: Failed to Create Account." };  // Return error object
   }
-
-  redirect('/dashboard/add-child');
 }
+
+
+
+
+

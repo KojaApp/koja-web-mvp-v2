@@ -1,36 +1,41 @@
 'use client';
 
-import { useState, useTransition } from 'react';
-import { useActionState } from 'react';
+import { useState } from 'react';
 import { addChild } from '@/app/lib/actions';
 import Link from 'next/link';
 import { Button } from '@/app/ui/button';
 
 export default function AddChildFormCopy() {
-  const [errorMessage, formAction] = useActionState(addChild, null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
-  const [isPending, startTransition] = useTransition(); // Start a transition to handle async
+  const [isPending, setIsPending] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const formData = new FormData(e.target);
+    const formData = new FormData(e.target as HTMLFormElement);
 
     // Log form data for debugging
     console.log("Form Data:", Object.fromEntries(formData.entries()));
 
-    // Dispatch the action using startTransition to handle async
-    startTransition(() => {
-      formAction(formData).then((result) => {
-        if (result) {
-          setIsSuccess(true); // Set success to true if result is not empty
-        } else {
-          setIsSuccess(false); // Otherwise, set it to false
-        }
-      }).catch((error) => {
-        setIsSuccess(false); // If an error occurs, set to false
-        console.error("Error:", error);
-      });
-    });
+    setIsPending(true);
+    try {
+      // Call addChild directly
+      const result = await addChild(null, formData); // Pass form data to addChild function
+
+      if (result.success) {
+        setIsSuccess(true);  // Show success if result is success
+        setErrorMessage(null);
+      } else {
+        setIsSuccess(false);
+        setErrorMessage(result.error);  // Show error if result has error
+      }
+    } catch (error) {
+      setIsPending(false);
+      setIsSuccess(false);
+      setErrorMessage("An unexpected error occurred.");
+      console.error("Error:", error);
+    }
+    setIsPending(false); // End the pending state
   };
 
   return (
@@ -79,17 +84,14 @@ export default function AddChildFormCopy() {
         </div>
       </div>
 
+      {/* Error message */}
       {errorMessage && <p className="text-red-600">{errorMessage}</p>}
 
+      {/* Success message */}
       {isSuccess && (
         <div className="text-green-600">
           <p>Child successfully added! You can now link the TFC account.</p>
-          {/* Add the button to link TFC account */}
-          <Button
-            onClick={() => {
-              // Handle TFC linking here (you can redirect or trigger some other action)
-            }}
-          >
+          <Button onClick={() => alert("Redirect to TFC Linking")}>
             Link TFC Account
           </Button>
         </div>
