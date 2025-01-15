@@ -99,19 +99,22 @@ export async function authenticate(
   try {
     await signIn('credentials', formData);
   } catch (error) {
-    if (error.code === 'CredentialsSignin') {
+    
+    // if (error.code === 'CredentialsSignin') {
 
-      // Display "Incorrect email or password" message
+    //   // Display "Incorrect email or password" message
+
+      
   
-    } else if (error.code === 'OAuthSignin') {
+    // } else if (error.code === 'OAuthSignin') {
   
-      // Display "Error signing in with provider" message
+    //   // Display "Error signing in with provider" message
   
-    } else {
+    // } else {
   
-      // Handle other potential errors
+    //   // Handle other potential errors
   
-    }
+    // }
   
   }}
 
@@ -129,7 +132,7 @@ export async function addInvoice(prevState: string | null, formData: FormData) {
   }
 
   const { childId, amount, status, dueDate } = validatedFields.data;
-  const childName = formData.get('childName');
+  const childName = formData.get('childName') as string;
 
   if (!childName) {
     console.error("Validation Error: Missing child's name.");
