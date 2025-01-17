@@ -11,6 +11,6 @@ This is the prototype for the Koja Web Appp
 ## Next features to be added
 
 - Yapily integration (single payment)
-- HMRC Sandboz API payment integration
+- HMRC Sandbox API payment integration
 - Pay invoices functionality
 
