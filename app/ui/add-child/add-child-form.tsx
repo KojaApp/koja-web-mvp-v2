@@ -106,7 +106,7 @@ export default function AddChildForm() {
           <p className="mb-4">Child successfully added.</p>
           <p></p>
           <div className="flex gap-4 items-end">
-            <Button onClick={handleHmrcRedirect}>Link TFC Account</Button>
+            <Button type="button" onClick={handleHmrcRedirect}>Link TFC Account</Button>
             <Link href="/dashboard" className="text-blue-600 underline">
               I will do this later
             </Link>
