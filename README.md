@@ -1,5 +1,10 @@
-## Next.js App Router Course - Starter
+## Koja Web App prototype
 
-This is the starter template for the Next.js App Router Course. It contains the starting code for the dashboard application.
+This is the prototype for the Koja Web Appp
 
-For more information, see the [course curriculum](https://nextjs.org/learn) on the Next.js Website.
+Functionality included (as of 17/01/2025):
+- Login
+- Registration
+- Add children & link TFC account (via HMRC Sandbox API)
+- Add invoices
+
