@@ -13,7 +13,7 @@ import { Button } from '@/app/ui/button';
 import { useActionState } from 'react';
 import { addInvoice } from '@/app/lib/actions';
 
-export default function AddInvoiceForm({ children }) {
+export default function AddInvoiceForm({ children, ...props } : any) {
   const [errorMessage, formAction] = useActionState(addInvoice, null);
 
   return (
@@ -39,7 +39,7 @@ export default function AddInvoiceForm({ children }) {
   }}
 >
   <option value="" disabled>Select a child</option>
-  {children.map((child) => (
+  {children.map((child: any) => (
     <option key={child.child_id} value={child.child_id}>
       {child.child_name}
     </option>

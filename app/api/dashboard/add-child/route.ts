@@ -3,27 +3,21 @@ import { v4 as uuidv4 } from 'uuid';
 import { sql } from '@vercel/postgres';
 import dotenv from 'dotenv';
 
-// Load environment variables
 dotenv.config();
 
 export async function POST(request: Request) {
   try {
-    // Parse the incoming request body
-    const body = await request.json();
-    const { childId } = body; // Assuming you pass a childId to identify the child
+    const { childId } = await request.json();
 
     if (!childId) {
-      return NextResponse.json(
-        { error: 'Missing required field: childId.' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Missing childId' }, { status: 400 });
     }
 
     // Fetch the child's details from the database
     const { rows } = await sql`
-      SELECT dob, outbound_child_payment_ref 
+      SELECT outbound_child_payment_ref 
       FROM children 
-      WHERE id = ${childId}
+      WHERE child_id = ${childId}
     `;
 
     if (rows.length === 0) {
@@ -33,7 +27,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const { dob, outbound_child_payment_ref } = rows[0];
+    const { outbound_child_payment_ref } = rows[0];
 
     // Retrieve values from environment variables
     const epp_unique_customer_id = process.env.EPP_UNIQUE_CUSTOMER_ID;
@@ -51,19 +45,19 @@ export async function POST(request: Request) {
       epp_unique_customer_id,
       epp_reg_reference,
       outbound_child_payment_ref,
-      child_date_of_birth: dob,
     };
 
     // Generate a unique Correlation-ID
     const correlationId = uuidv4();
 
     // Make the API request to HMRC
-    const response = await fetch('https://sandbox-api.hmrc.gov.uk/link-tfc', {
+    const response = await fetch('https://test-api.service.hmrc.gov.uk/individuals/tax-free-childcare/payments/link', {
       method: 'POST',
       headers: {
-        Accept: 'application/vnd.hmrc.1.2+json',
-        'Content-Type': 'application/json',
-        'Correlation-ID': correlationId,
+      'Authorization': `Bearer ${process.env.HMRC_API_TOKEN}`,
+      'Accept': 'application/vnd.hmrc.1.2+json',
+      'Content-Type': 'application/json',
+      'Correlation-ID': correlationId,
       },
       body: JSON.stringify(payload),
     });

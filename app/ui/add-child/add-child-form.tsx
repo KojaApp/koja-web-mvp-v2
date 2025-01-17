@@ -1,16 +1,58 @@
 'use client';
 
 import { useState } from 'react';
-import { useActionState } from 'react';
 import { addChild } from '@/app/lib/actions';
 import Link from 'next/link';
 import { Button } from '@/app/ui/button';
 
 export default function AddChildForm() {
-  const [errorMessage, formAction] = useActionState(addChild, null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [isPending, setIsPending] = useState(false);
+  const [childId, setChildId] = useState<string | null>(null); // State for childId
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.target as HTMLFormElement);
+
+    setIsPending(true);
+    try {
+      const result = await addChild(null, formData); // Add child to the database
+
+      if (result.success) {
+        setIsSuccess(true);
+        setErrorMessage(null);
+        setChildId(result.childId); // Store the childId
+      } else {
+        setIsSuccess(false);
+        setErrorMessage(result.error);
+      }
+    } catch (error) {
+      setIsPending(false);
+      setIsSuccess(false);
+      setErrorMessage("An unexpected error occurred.");
+      console.error("Error:", error);
+    }
+    setIsPending(false);
+  };
+
+  const handleHmrcRedirect = () => {
+    if (!childId) {
+      alert("Error: No child data available.");
+      return;
+    }
+
+    const clientId = process.env.NEXT_PUBLIC_HMRC_CLIENT_ID; // Store in .env file
+    const redirectUri = encodeURIComponent("http://localhost:3000/dashboard/add-child/link-tfc-callback");
+    const scope = encodeURIComponent("tax-free-childcare-payments");
+    const state = encodeURIComponent(childId); // Use the childId to maintain context
+    const authorizationUrl = `https://test-api.service.hmrc.gov.uk/oauth/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}&state=${state}`;
+
+    window.location.href = authorizationUrl; // Redirect to HMRC authorization URL
+  };
 
   return (
-    <form action={formAction} className="space-y-3">
+    <form onSubmit={handleSubmit} className="space-y-3">
       <div className="rounded-md bg-gray-50 p-4 md:p-6">
         {/* Child Name */}
         <div className="mb-4">
@@ -55,16 +97,32 @@ export default function AddChildForm() {
         </div>
       </div>
 
+      {/* Error message */}
       {errorMessage && <p className="text-red-600">{errorMessage}</p>}
 
+      {/* Success message */}
+      {isSuccess && (
+        <div className="text-green-600">
+          <p>Child successfully added! What would you like to do next?</p>
+          <div className="flex gap-4">
+            <Button onClick={handleHmrcRedirect}>Link TFC Account</Button>
+            <Link href="/dashboard" className="text-blue-600 underline">
+              I will do this later
+            </Link>
+          </div>
+        </div>
+      )}
+
       <div className="mt-6 flex justify-end gap-4">
-      <Link
-  href="/dashboard/add-child"
-  className="flex h-10 items-center justify-center rounded-lg bg-gray-100 px-4 text-sm font-medium text-gray-600 hover:bg-gray-200"
->
-  Cancel
-</Link>
-        <Button type="submit">Add Child</Button>
+        <Link
+          href="/dashboard/add-child"
+          className="flex h-10 items-center justify-center rounded-lg bg-gray-100 px-4 text-sm font-medium text-gray-600 hover:bg-gray-200"
+        >
+          Cancel
+        </Link>
+        <Button type="submit" disabled={isPending}>
+          {isPending ? "Submitting..." : "Add Child"}
+        </Button>
       </div>
     </form>
   );

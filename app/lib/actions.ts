@@ -1,13 +1,13 @@
 'use server';
  
 import { signIn } from '@/auth';
-import { AuthError } from 'next-auth';
 import bcrypt from 'bcrypt';
 import {v4 as uuidv4} from "uuid"
 import z from 'zod';
 import { sql } from '@vercel/postgres';
 import { redirect } from 'next/navigation';
 import { getSession } from 'next-auth/react';
+import NextAuth from "next-auth"
 
 const RegisterUser = z.object({
   name: z.string({
@@ -99,17 +99,24 @@ export async function authenticate(
   try {
     await signIn('credentials', formData);
   } catch (error) {
-    if (error instanceof AuthError) {
-      switch (error.type) {
-        case 'CredentialsSignin':
-          return 'Invalid credentials.';
-        default:
-          return 'Something went wrong.';
-      }
-    }
-    throw error;
-  }
-}
+    
+    // if (error.code === 'CredentialsSignin') {
+
+    //   // Display "Incorrect email or password" message
+
+      
+  
+    // } else if (error.code === 'OAuthSignin') {
+  
+    //   // Display "Error signing in with provider" message
+  
+    // } else {
+  
+    //   // Handle other potential errors
+  
+    // }
+  
+  }}
 
 export async function addInvoice(prevState: string | null, formData: FormData) {
   const validatedFields = AddingInvoice.safeParse({
@@ -125,7 +132,7 @@ export async function addInvoice(prevState: string | null, formData: FormData) {
   }
 
   const { childId, amount, status, dueDate } = validatedFields.data;
-  const childName = formData.get('childName');
+  const childName = formData.get('childName') as string;
 
   if (!childName) {
     console.error("Validation Error: Missing child's name.");
@@ -169,7 +176,7 @@ export async function addChild(prevState: string | null, formData: FormData) {
 
   if (!validatedFields.success) {
     console.error("Validation Errors:", validatedFields.error.errors);
-    return "Missing Fields. Failed to Create Account.";
+    return { success: false, error: "Missing Fields. Failed to Create Account." };
   }
 
   const { name, DOB, TFC } = validatedFields.data;
@@ -179,14 +186,13 @@ export async function addChild(prevState: string | null, formData: FormData) {
 
   try {
     await sql`
-      INSERT INTO children (child_id, child_name, child_dob, tfc_account_ref)
+      INSERT INTO children (child_id, child_name, child_dob, outbound_child_payment_ref)
       VALUES (${child_id}, ${name}, ${DOB}, ${TFC})
     `;
     console.log("Child successfully added:", { child_id, name, DOB, TFC });
+    return { success: true, childId: child_id };  // Return childId here
   } catch (error) {
     console.error("Database Error:", error);
-    return "Database Error: Failed to Create Account.";
+    return { success: false, error: "Database Error: Failed to Create Account." };  // Return error object
   }
-
-  redirect('/dashboard/add-child');
 }
