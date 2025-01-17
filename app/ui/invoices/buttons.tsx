@@ -36,15 +36,36 @@ export function UpdateInvoice({ id }: { id: string }) {
   );
 }
 
-export function PayInvoice({ id }: { id: string }) {
+export function PayInvoice({
+  id,
+  name,
+  amount,
+  date,
+}: {
+  id: string;
+  name: string;
+  amount: number;
+  date: string;
+}) {
+  console.log("PayInvoice Props:", { id, name, amount, date }); // Debugging
+
   return (
     <Link
-      href="/dashboard/invoices/pay"
       className="rounded-md border p-2 hover:bg-gray-100"
+      href={{
+        pathname: '/dashboard/invoices/pay',
+        query: {
+          id,
+          name,
+          amount,
+          date: encodeURIComponent(date), // Ensure the date is URL-safe
+        },
+      }}
     >
       <CreditCardIcon className="w-5" />
     </Link>
   );
+  
 }
 
 export function DeleteInvoice({ id }: { id: string }) {

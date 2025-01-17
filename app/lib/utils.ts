@@ -8,19 +8,10 @@ export const formatCurrency = (amount: number) => {
   });
 };
 
-export const formatDateToLocal = (
-  dateStr: string,
-  locale: string = 'en-GB',
-) => {
-  const date = new Date(dateStr);
-  const options: Intl.DateTimeFormatOptions = {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  };
-  const formatter = new Intl.DateTimeFormat(locale, options);
-  return formatter.format(date);
-};
+export function formatDateToLocal(date: string | Date): string {
+  const options = { year: 'numeric', month: 'short', day: 'numeric' } as const;
+  return new Date(date).toLocaleDateString('en-GB', options); // Returns '31 Jan 2025'
+}
 
 export const generateYAxis = (revenue: Revenue[]) => {
   // Calculate what labels we need to display on the y-axis
