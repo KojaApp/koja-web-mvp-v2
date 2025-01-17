@@ -158,9 +158,6 @@ export async function addInvoice(prevState: string | null, formData: FormData) {
   redirect('/dashboard/invoices');
 }
 
-
-
-
 export async function addChild(prevState: string | null, formData: FormData) {
   const validatedFields = AddingChild.safeParse({
     name: formData.get('name'),
@@ -190,3 +187,4 @@ export async function addChild(prevState: string | null, formData: FormData) {
     return { success: false, error: "Database Error: Failed to Create Account." };  // Return error object
   }
 }
+
