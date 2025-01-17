@@ -7,6 +7,7 @@ This is the prototype for the Koja Web Appp
 - Registration
 - Add children & link TFC account (via HMRC Sandbox API)
 - Add invoices
+- Check TFC account balances (via HMRC Sandbox API)
 
 ## Next features to be added
 
