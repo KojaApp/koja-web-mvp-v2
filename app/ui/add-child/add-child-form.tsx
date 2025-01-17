@@ -6,30 +6,26 @@ import Link from 'next/link';
 import { Button } from '@/app/ui/button';
 
 export default function AddChildForm() {
-  const [errorMessage, setErrorMessage] = useState<any | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
   const [isPending, setIsPending] = useState(false);
-  const [childId, setChildId] = useState<any | null>(null);  // State for childId
+  const [childId, setChildId] = useState<string | null>(null); // State for childId
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.target as HTMLFormElement);
 
-    // Log form data for debugging
-    console.log("Form Data:", Object.fromEntries(formData.entries()));
-
     setIsPending(true);
     try {
-      // Call addChild directly
-      const result = await addChild(null, formData); // Pass form data to addChild function
+      const result = await addChild(null, formData); // Add child to the database
 
       if (result.success) {
-        setIsSuccess(true);  // Show success if result is success
+        setIsSuccess(true);
         setErrorMessage(null);
-        setChildId(result.childId); // Store the childId here
+        setChildId(result.childId); // Store the childId
       } else {
         setIsSuccess(false);
-        setErrorMessage(result.error);  // Show error if result has error
+        setErrorMessage(result.error);
       }
     } catch (error) {
       setIsPending(false);
@@ -37,36 +33,22 @@ export default function AddChildForm() {
       setErrorMessage("An unexpected error occurred.");
       console.error("Error:", error);
     }
-    setIsPending(false); // End the pending state
+    setIsPending(false);
   };
 
-  // Function to handle TFC linking
-  const handleLinkTfc = async () => {
+  const handleHmrcRedirect = () => {
     if (!childId) {
-      console.error("Child ID is missing.");
+      alert("Error: No child data available.");
       return;
     }
 
-    // Trigger API to link TFC account only when childId exists
-    try {
-      const response = await fetch('/api/dashboard/add-child', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ childId }), // Send the childId in the request body
-      });
+    const clientId = process.env.NEXT_PUBLIC_HMRC_CLIENT_ID; // Store in .env file
+    const redirectUri = encodeURIComponent("http://localhost:3000/dashboard/add-child/link-tfc-callback");
+    const scope = encodeURIComponent("tax-free-childcare-payments");
+    const state = encodeURIComponent(childId); // Use the childId to maintain context
+    const authorizationUrl = `https://test-api.service.hmrc.gov.uk/oauth/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}&state=${state}`;
 
-      const result = await response.json();
-      if (response.ok) {
-        alert("TFC Account Linked Successfully");
-      } else {
-        alert(`Failed to link TFC Account: ${result.error}`);
-      }
-    } catch (error) {
-      console.error("Error linking TFC account:", error);
-      alert("An unexpected error occurred while linking the TFC account.");
-    }
+    window.location.href = authorizationUrl; // Redirect to HMRC authorization URL
   };
 
   return (
@@ -121,8 +103,13 @@ export default function AddChildForm() {
       {/* Success message */}
       {isSuccess && (
         <div className="text-green-600">
-          <p>Child successfully added! You can now link the TFC account.</p>
-          <Button onClick={handleLinkTfc}>Link TFC Account</Button>
+          <p>Child successfully added! What would you like to do next?</p>
+          <div className="flex gap-4">
+            <Button onClick={handleHmrcRedirect}>Link TFC Account</Button>
+            <Link href="/dashboard" className="text-blue-600 underline">
+              I will do this later
+            </Link>
+          </div>
         </div>
       )}
 
@@ -134,7 +121,7 @@ export default function AddChildForm() {
           Cancel
         </Link>
         <Button type="submit" disabled={isPending}>
-          {isPending ? 'Submitting...' : 'Add Child'}
+          {isPending ? "Submitting..." : "Add Child"}
         </Button>
       </div>
     </form>
