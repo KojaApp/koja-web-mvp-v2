@@ -8,6 +8,7 @@ import { sql } from '@vercel/postgres';
 import { redirect } from 'next/navigation';
 import { getSession } from 'next-auth/react';
 import NextAuth from "next-auth"
+import { AuthError } from 'next-auth';
 
 const RegisterUser = z.object({
   name: z.string({
@@ -99,24 +100,17 @@ export async function authenticate(
   try {
     await signIn('credentials', formData);
   } catch (error) {
-    
-    // if (error.code === 'CredentialsSignin') {
-
-    //   // Display "Incorrect email or password" message
-
-      
-  
-    // } else if (error.code === 'OAuthSignin') {
-  
-    //   // Display "Error signing in with provider" message
-  
-    // } else {
-  
-    //   // Handle other potential errors
-  
-    // }
-  
-  }}
+    if (error instanceof AuthError) {
+      switch (error.type) {
+        case 'CredentialsSignin':
+          return 'Invalid credentials.';
+        default:
+          return 'Something went wrong.';
+      }
+    }
+    throw error;
+  }
+}
 
 export async function addInvoice(prevState: string | null, formData: FormData) {
   const validatedFields = AddingInvoice.safeParse({
