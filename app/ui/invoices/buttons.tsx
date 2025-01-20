@@ -51,7 +51,7 @@ export function PayInvoice({
 
   return (
     <Link
-      className="rounded-md border p-2 hover:bg-gray-100"
+      className="rounded-md border p-2 hover:bg-green-600 hover:text-white"
       href={{
         pathname: '/dashboard/invoices/pay',
         query: {
@@ -62,7 +62,7 @@ export function PayInvoice({
         },
       }}
     >
-      <CreditCardIcon className="w-5" />
+      Pay invoice
     </Link>
   );
   
