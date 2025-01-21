@@ -47,7 +47,7 @@ export default async function InvoicesTable({
                     <p>{formatDateToLocal(invoice.due_date)}</p>
                   </div>
                   <div className="flex justify-end gap-2">
-                  <PayInvoice id={invoice.invoice_id} />
+                  <PayInvoice id={invoice.invoice_id} name={invoice.name} amount={invoice.amount} date={invoice.due_date}/>
                     <UpdateInvoice id={invoice.invoice_id} />
                     <DeleteInvoice id={invoice.invoice_id} />
                   </div>
@@ -110,7 +110,12 @@ export default async function InvoicesTable({
                   </td>
                   <td className="whitespace-nowrap py-3 pl-6 pr-3">
                     <div className="flex justify-end gap-3">
-                    <PayInvoice id={invoice.id} />
+                    <PayInvoice
+  id={invoice.invoice_id}
+  name={invoice.name}
+  amount={invoice.amount}
+  date={formatDateToLocal(invoice.due_date)} // Verify this returns a valid string
+/>
                       <UpdateInvoice id={invoice.id} />
                       <DeleteInvoice id={invoice.id} />
                     </div>
