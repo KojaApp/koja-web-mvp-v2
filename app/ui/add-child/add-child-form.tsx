@@ -14,11 +14,16 @@ export default function AddChildForm() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.target as HTMLFormElement);
-
+  
+    // Log the form data to check the values being passed
+    for (let [key, value] of formData.entries()) {
+      console.log(key, value);
+    }
+  
     setIsPending(true);
     try {
       const result = await addChild(null, formData); // Add child to the database
-
+  
       if (result.success) {
         setIsSuccess(true);
         setErrorMessage(null);
@@ -78,6 +83,34 @@ export default function AddChildForm() {
             name="DOB"
             type="date"
             placeholder="Date of birth"
+            className="block w-full rounded-md border border-gray-200 py-2 px-3 text-sm placeholder-gray-500"
+          />
+        </div>
+
+        {/* CCP Reference */}
+        <div className="mb-4">
+          <label htmlFor="ccp_ref" className="mb-2 block text-sm font-medium">
+            Childcare Provider Reference
+          </label>
+          <input
+            id="ccp_ref"
+            name="ccp_ref"
+            type="text"
+            placeholder="Enter childcare provider reference"
+            className="block w-full rounded-md border border-gray-200 py-2 px-3 text-sm placeholder-gray-500"
+          />
+        </div>
+
+        {/* CCP Postcode */}
+        <div className="mb-4">
+          <label htmlFor="ccp_pc" className="mb-2 block text-sm font-medium">
+            Childcare Provider Postcode
+          </label>
+          <input
+            id="ccp_pc"
+            name="ccp_pc"
+            type="text"
+            placeholder="Enter childcare provider's postcode"
             className="block w-full rounded-md border border-gray-200 py-2 px-3 text-sm placeholder-gray-500"
           />
         </div>

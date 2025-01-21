@@ -35,6 +35,12 @@ const AddingChild = z.object({
   TFC: z.string({
     invalid_type_error: 'Please enter tax-free childcare account reference.',
   }),
+  ccp_ref: z.string({
+    invalid_type_error: 'Please enter childcare provider reference.',
+  }),
+  ccp_pc: z.string({
+    invalid_type_error: 'Please enter childcare provider postcode.',
+  }),
 });
 
 const AddingInvoice = z.object({
@@ -163,6 +169,9 @@ export async function addChild(prevState: string | null, formData: FormData) {
     name: formData.get('name'),
     DOB: formData.get('DOB'),
     TFC: formData.get('TFC'),
+    ccp_ref: formData.get('ccp_ref'),
+    ccp_pc: formData.get('ccp_pc'),
+
   });
 
   if (!validatedFields.success) {
@@ -170,21 +179,31 @@ export async function addChild(prevState: string | null, formData: FormData) {
     return { success: false, error: "Missing Fields. Failed to Create Account." };
   }
 
-  const { name, DOB, TFC } = validatedFields.data;
+  const { name, DOB, TFC, ccp_ref, ccp_pc } = validatedFields.data;
   const child_id = uuidv4();
 
-  console.log("Attempting to insert child:", { child_id, name, DOB, TFC });
+  console.log("Attempting to insert child:", { child_id, name, DOB, TFC, ccp_ref, ccp_pc });
 
   try {
     await sql`
-      INSERT INTO children (child_id, child_name, child_dob, outbound_child_payment_ref)
-      VALUES (${child_id}, ${name}, ${DOB}, ${TFC})
+      INSERT INTO children (child_id, child_name, child_dob, outbound_child_payment_ref, ccp_reg_reference, ccp_postcode)
+      VALUES (${child_id}, ${name}, ${DOB}, ${TFC}, ${ccp_ref}, ${ccp_pc})
     `;
-    console.log("Child successfully added:", { child_id, name, DOB, TFC });
+    console.log("Child successfully added:", { child_id, name, DOB, TFC, ccp_ref, ccp_pc });
     return { success: true, childId: child_id };  // Return childId here
   } catch (error) {
     console.error("Database Error:", error);
     return { success: false, error: "Database Error: Failed to Create Account." };  // Return error object
   }
+}
+
+export async function fetchInvoiceDetails(invoiceId: string) {
+  const result = await sql`
+    SELECT invoice_id, payment_reference, estimated_payment_date, correlation_id
+    FROM invoices
+    WHERE invoice_id = ${invoiceId}
+  `;
+
+  return result.rows[0];  // Assuming you're using PostgreSQL, adjust according to your database
 }
 

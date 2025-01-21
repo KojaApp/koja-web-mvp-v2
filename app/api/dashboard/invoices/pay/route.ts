@@ -1,83 +1,137 @@
-// app/api/dashboard/invoices/get-child-token/route.ts
-
 import { sql } from '@vercel/postgres';
 import { NextResponse } from 'next/server';
 import { v4 as uuidv4 } from "uuid";
 
 export async function POST(req: Request) {
   try {
-    const { invoiceId } = await req.json();
+    const { action, invoiceId, payment_amount } = await req.json();
 
-    if (!invoiceId) {
-      return NextResponse.json({ error: 'Invoice ID is required' }, { status: 400 });
+    if (!action || !invoiceId) {
+      return NextResponse.json({ error: 'Action and Invoice ID are required' }, { status: 400 });
     }
 
-    // Query to find the associated child ID for the invoice
-    const result = await sql`
-      SELECT child_id
+    // Step 1: Fetch associated child ID and amount for the invoice
+    const invoiceResult = await sql`
+      SELECT child_id, amount
       FROM invoices
       WHERE invoice_id = ${invoiceId}
     `;
 
-    if (result.rowCount === 0) {
+    if (invoiceResult.rowCount === 0) {
       return NextResponse.json({ error: 'Invoice not found' }, { status: 404 });
     }
 
-    const childId = result.rows[0].child_id;
+    const { child_id: childId, amount } = invoiceResult.rows[0];
 
-    // Retrieve the token for the associated child
-    const tokenResult = await sql`
-      SELECT access_token
+    // Step 2: Fetch all required data for the child
+    const childResult = await sql`
+      SELECT 
+        access_token, 
+        outbound_child_payment_ref, 
+        ccp_reg_reference, 
+        ccp_postcode
       FROM children
       WHERE child_id = ${childId}
     `;
 
-    if (tokenResult.rowCount === 0) {
-      return NextResponse.json({ error: 'Token not found for this child' }, { status: 404 });
+    if (childResult.rowCount === 0) {
+      return NextResponse.json({ error: 'Child not found or missing details' }, { status: 404 });
     }
 
-    // Retrieve the payment reference for the child
-    const paymentRefResult = await sql`
-      SELECT outbound_child_payment_ref
-      FROM children
-      WHERE child_id = ${childId}
-    `;
+    const { 
+      access_token: token, 
+      outbound_child_payment_ref: outboundChildPaymentRef, 
+      ccp_reg_reference: ccpRegReference, 
+      ccp_postcode: ccpPostcode 
+    } = childResult.rows[0];
 
-    if (paymentRefResult.rowCount === 0) {
-      return NextResponse.json({ error: 'Payment reference not found' }, { status: 404 });
+    if (!token || !outboundChildPaymentRef) {
+      return NextResponse.json({ error: 'Required child data missing' }, { status: 400 });
     }
 
-    const token = tokenResult.rows[0].access_token;
-    const outboundChildPaymentRef = paymentRefResult.rows[0].outbound_child_payment_ref;
+    // Step 3: Define shared constants
     const correlationId = uuidv4();
     const eppUniqueCustomerId = process.env.EPP_UNIQUE_CUSTOMER_ID;
     const eppRegReference = process.env.EPP_REG_REFERENCE;
 
-    // Make the API call to HMRC
-    const hmrcResponse = await fetch('https://test-api.service.hmrc.gov.uk/individuals/tax-free-childcare/payments/balance', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: "application/vnd.hmrc.1.2+json",
-        'Correlation-ID': correlationId,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        epp_reg_reference: eppRegReference,
-        epp_unique_customer_id: eppUniqueCustomerId,
-        outbound_child_payment_ref: outboundChildPaymentRef,
-      }),
-    });
+    // Step 4: Handle actions
+    if (action === 'checkBalance') {
+      const hmrcResponse = await fetch('https://test-api.service.hmrc.gov.uk/individuals/tax-free-childcare/payments/balance', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/vnd.hmrc.1.2+json",
+          'Correlation-ID': correlationId,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          epp_reg_reference: eppRegReference,
+          epp_unique_customer_id: eppUniqueCustomerId,
+          outbound_child_payment_ref: outboundChildPaymentRef,
+        }),
+      });
 
-    if (!hmrcResponse.ok) {
-      const errorData = await hmrcResponse.json();
-      return NextResponse.json({ error: 'HMRC API call failed', details: errorData }, { status: hmrcResponse.status });
+      if (!hmrcResponse.ok) {
+        const errorData = await hmrcResponse.json();
+        return NextResponse.json({ error: 'HMRC balance API call failed', details: errorData }, { status: hmrcResponse.status });
+      }
+
+      const balanceData = await hmrcResponse.json();
+      return NextResponse.json(balanceData);
     }
 
-    const hmrcData = await hmrcResponse.json();
+    if (action === 'payInvoice') {
+      const hmrcResponse = await fetch('https://test-api.service.hmrc.gov.uk/individuals/tax-free-childcare/payments', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: 'application/vnd.hmrc.1.2+json',
+          'Correlation-ID': correlationId,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          epp_reg_reference: eppRegReference,
+          epp_unique_customer_id: eppUniqueCustomerId,
+          outbound_child_payment_ref: outboundChildPaymentRef,
+          payment_amount: parseFloat(amount), // Use the correct amount from the database
+          ccp_reg_reference: ccpRegReference,
+          ccp_postcode: ccpPostcode,
+          payee_type: 'CCP',
+        }),
+      });
 
-    // Return the HMRC response data to the client
-    return NextResponse.json(hmrcData);
+      if (!hmrcResponse.ok) {
+        const errorData = await hmrcResponse.json();
+        return NextResponse.json({ error: 'HMRC payment API call failed', details: errorData }, { status: hmrcResponse.status });
+      }
+
+      // Extract the values from the response
+      const correlationIdFromResponse = hmrcResponse.headers.get('Correlation-ID');
+      const paymentResponse = await hmrcResponse.json();
+      const { payment_reference, estimated_payment_date } = paymentResponse;
+
+      // Step 5: Update the invoice with the new data
+      try {
+        await sql`
+          UPDATE invoices
+          SET correlation_id = ${correlationIdFromResponse},
+              payment_reference = ${payment_reference},
+              estimated_payment_date = ${estimated_payment_date}
+          WHERE invoice_id = ${invoiceId}
+        `;
+        console.log('Invoice successfully updated with HMRC data');
+      } catch (error) {
+        console.error('Error updating invoice in database:', error);
+        return NextResponse.json({ error: 'Failed to update invoice in database' }, { status: 500 });
+      }
+
+      return NextResponse.json({ success: true, 
+                                 paymentResponse,
+                                 correlationId: correlationId, });
+    }
+
+    // Step 6: Handle unsupported actions
+    return NextResponse.json({ error: 'Unsupported action' }, { status: 400 });
   } catch (error) {
     console.error('Error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
