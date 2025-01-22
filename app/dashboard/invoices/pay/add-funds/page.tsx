@@ -1,96 +1,78 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
+import Image from 'next/image'
 
 export default function AddFundsPage() {
-  const [institutions, setInstitutions] = useState<any[]>([]); // Store the fetched institutions
-  const [searchTerm, setSearchTerm] = useState(''); // Store the search term
-  const [loading, setLoading] = useState(false); // Track loading state
-  const [error, setError] = useState<string | null>(null); // Track any error
+  const searchParams = useSearchParams();
+  const amount = parseFloat(searchParams.get('amount') || '0');
 
-  // Fetch institutions on page load
+  const [institutions, setInstitutions] = useState<any[]>([]);
+  const [meta, setMeta] = useState<{ count: number } | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
+
   useEffect(() => {
-    const fetchInstitutions = async () => {
-      setLoading(true);
-      setError(null);
-
-      try {
-        const response = await fetch('/api/dashboard/invoices/pay/add-funds', {
-          method: 'GET', 
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ action: 'getInstitutions' }),
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch institutions.');
-        }
-
-        const data = await response.json();
-        setInstitutions(data.institutions || []); // Assuming API returns { institutions: [...] }
-      } catch (err: any) {
-        setError(err.message || 'An error occurred while fetching institutions.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchInstitutions();
-  }, []); // Empty dependency array ensures this runs once on page load
+  }, []);
 
-  // Filter institutions based on search term
-  const filteredInstitutions = institutions.filter((institution) =>
-    institution.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const fetchInstitutions = async () => {
+    setLoading(true);
+    setError(false);
+
+    try {
+      const response = await fetch(`/api/dashboard/invoices/pay/add-funds?amount=${amount}`);
+      const responseData = await response.json();
+      console.log("API Response:", responseData); // Check full response structure
+
+      if (response.ok) {
+        // Ensure the data is correctly extracted from the response
+        const institutionsData = responseData.institutions?.data || []; // Correctly access 'data'
+        console.log("Institutions Data:", institutionsData); // Check if institutions data exists
+
+        // Set state based on the fetched data
+        setInstitutions(institutionsData);
+        setMeta(responseData.institutions?.meta || { count: 0 });
+      } else {
+        console.error("API Error:", responseData.error);
+        setError(true);
+      }
+    } catch (err) {
+      console.error("Fetch Error:", err);
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  console.log("Institutions State:", institutions); // Check institutions state before rendering
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
-      <header className="mb-6">
-        <h1 className="text-2xl font-semibold">Add Funds</h1>
-        <p className="text-sm text-gray-500">
-          Select your institution to proceed with adding funds.
-        </p>
-      </header>
+      <h1 className="text-2xl font-semibold mb-4">Add Funds</h1>
 
+      {/* Loading and Error Handling */}
       {loading && <p>Loading institutions...</p>}
-      {error && <p className="text-red-500">{error}</p>}
+      {error && <p className="text-red-500">There was an error fetching institutions.</p>}
 
-      {/* Search Bar */}
-      {!loading && !error && (
-        <div className="mb-4">
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search institutions..."
-            className="w-full p-2 border rounded"
-          />
-        </div>
-      )}
-
-      {/* Institutions Table */}
-      {!loading && !error && filteredInstitutions.length > 0 && (
-        <table className="table-auto w-full bg-white shadow rounded-lg">
-          <thead className="bg-gray-200">
-            <tr>
-              <th className="px-4 py-2">Name</th>
-              <th className="px-4 py-2">Details</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredInstitutions.map((institution) => (
-              <tr key={institution.id} className="border-t">
-                <td className="px-4 py-2">{institution.name}</td>
-                <td className="px-4 py-2">{institution.details}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
-
-      {!loading && !error && filteredInstitutions.length === 0 && (
-        <p>No institutions found.</p>
+      {/* Institutions List */}
+      {!loading && !error && meta?.count > 0 ? (
+        <ul className="list-disc list-inside bg-white p-4 rounded shadow">
+          {institutions.map((institution: any) => (
+            <li key={institution.id}>
+                <Image
+      src="{institution.image}"
+      width={500}
+      height={500}
+      alt="Picture of the author"
+    />
+              <p className="font-medium">{institution.name}</p>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        !loading && !error && <p>No institutions available.</p>
       )}
     </div>
   );
