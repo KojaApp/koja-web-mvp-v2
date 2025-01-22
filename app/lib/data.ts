@@ -9,25 +9,26 @@ import {
   Revenue,
 } from './definitions';
 import { formatCurrency } from './utils';
+import { auth } from '@/auth';
 
-export async function fetchRevenue() {
-  try {
-    // Artificially delay a response for demo purposes.
-    // Don't do this in production :)
+// export async function fetchRevenue() {
+//   try {
+//     // Artificially delay a response for demo purposes.
+//     // Don't do this in production :)
 
-    // console.log('Fetching revenue data...');
-    // await new Promise((resolve) => setTimeout(resolve, 3000));
+//     // console.log('Fetching revenue data...');
+//     // await new Promise((resolve) => setTimeout(resolve, 3000));
 
-    const data = await sql<Revenue>`SELECT * FROM revenue`;
+//     const data = await sql<Revenue>`SELECT * FROM revenue`;
 
-    // console.log('Data fetch completed after 3 seconds.');
+//     // console.log('Data fetch completed after 3 seconds.');
 
-    return data.rows;
-  } catch (error) {
-    console.error('Database Error:', error);
-    throw new Error('Failed to fetch revenue data.');
-  }
-}
+//     return data.rows;
+//   } catch (error) {
+//     console.error('Database Error:', error);
+//     throw new Error('Failed to fetch revenue data.');
+//   }
+// }
 
 export async function fetchLatestInvoices() {
   try {
@@ -186,21 +187,50 @@ export async function fetchCustomers() {
 
 export async function fetchChildren() {
   try {
+    // Retrieve the authenticated user's session using email to get user.id
+    const session = await auth();  // Or use getSession() if you're using that
+    console.log('Session data:', session);  // Log the session to see the structure
+    if (!session || !session.user) {
+      throw new Error('User not authenticated.');
+    }
+
+    const userEmail = session.user.email;
+    console.log('User Email:', userEmail);  // Log the email
+
+    // Query the database to get the user ID from the email
+    const userQuery = await sql`
+      SELECT id FROM users WHERE email = ${userEmail}
+    `;
+    console.log('User query result:', userQuery);  // Log the query result to check if we get the ID
+
+    const userId = userQuery.rows[0]?.id;  // Make sure to access the correct row to get the id
+
+    if (!userId) {
+      throw new Error('User not found for email: ' + userEmail);
+    }
+
+    // Debug: log the userId before querying children
+    console.log('User ID:', userId);
+
+    // Corrected query to fetch the user's children
     const data = await sql<ChildField>`
       SELECT
         child_id,
         child_name
       FROM children
+      WHERE user_id = ${userId} 
       ORDER BY child_name ASC
     `;
 
+    console.log('Fetched children data:', data);  // Log the fetched data
     const children = data.rows;
     return children;
   } catch (err) {
     console.error('Database Error:', err);
-    throw new Error('Failed to fetch all customers.');
+    throw new Error('Failed to fetch children for the authenticated user.');
   }
 }
+
 
 export async function fetchFilteredCustomers(query: string) {
   try {
