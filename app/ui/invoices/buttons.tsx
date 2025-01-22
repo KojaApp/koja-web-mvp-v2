@@ -78,3 +78,21 @@ export function DeleteInvoice({ id }: { id: string }) {
     </>
   );
 }
+
+export function AddFunds({ amount }: { amount: number }) {
+  console.log("AddFunds Props:", { amount }); // Debugging
+
+  return (
+    <Link
+      className="mt-4 px-6 py-2 bg-green-600 text-white font-medium rounded hover:bg-green-700"
+      href={{
+        pathname: '/dashboard/invoices/pay/add-funds',
+        query: {
+          amount,
+        },
+      }}
+    >
+      Add funds
+    </Link>
+  );
+}

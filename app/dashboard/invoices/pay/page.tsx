@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { formatDateToLocal } from '@/app/lib/utils';
 import { montserrat } from '@/app/ui/fonts';
-import { fetchInvoiceDetails } from '@/app/lib/actions';
+import { AddFunds } from '@/app/ui/invoices/buttons';
 
 export default function PayInvoicePage() {
   const searchParams = useSearchParams();
@@ -159,10 +159,10 @@ export default function PayInvoicePage() {
             </button>
           ) : (
             <>
-              <div className="mt-8"><p>You currently have insufficient funds in your Tax Free Childcare account to pay this invoice.</p></div>
-              <button className="mt-4 px-6 py-2 bg-green-600 text-white font-medium rounded hover:bg-green-700">
-                Add funds
-              </button>
+              <div className="mt-8 mb-4"><p>You currently have insufficient funds in your Tax Free Childcare account to pay this invoice.</p></div>
+
+              <AddFunds amount={amount} />
+              
             </>
           )}
         </section>
