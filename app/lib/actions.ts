@@ -9,6 +9,7 @@ import { redirect } from 'next/navigation';
 import { getSession } from 'next-auth/react';
 import NextAuth from "next-auth"
 import { AuthError } from 'next-auth';
+import { auth } from "@/auth";
 
 const RegisterUser = z.object({
   name: z.string({
@@ -171,7 +172,6 @@ export async function addChild(prevState: string | null, formData: FormData) {
     TFC: formData.get('TFC'),
     ccp_ref: formData.get('ccp_ref'),
     ccp_pc: formData.get('ccp_pc'),
-
   });
 
   if (!validatedFields.success) {
@@ -180,30 +180,39 @@ export async function addChild(prevState: string | null, formData: FormData) {
   }
 
   const { name, DOB, TFC, ccp_ref, ccp_pc } = validatedFields.data;
-  const child_id = uuidv4();
 
-  console.log("Attempting to insert child:", { child_id, name, DOB, TFC, ccp_ref, ccp_pc });
+  // Retrieve the authenticated user's session using email to get user.id
+  const session = await auth();  // Or use getSession() if you're using that
+  console.log('Session data:', session);  // Log the session to see the structure
+  if (!session || !session.user) {
+    return { success: false, error: 'User not authenticated.' };
+  }
+
+  const userEmail = session.user.email;
+  console.log('User Email:', userEmail);  // Log the email
+
+  // Query the database to get the user ID from the email
+  const userQuery = await sql`SELECT id FROM users WHERE email = ${userEmail}`;
+  console.log('User query result:', userQuery);  // Log the query result to check if we get the ID
+
+  const userId = userQuery.rows[0]?.id;  // Make sure to access the correct row to get the id
+
+  if (!userId) {
+    console.error('User not found for email:', userEmail);  // Log an error if the user is not found
+    return { success: false, error: 'User not found.' };
+  }
+
+  const childId = uuidv4();
 
   try {
     await sql`
-      INSERT INTO children (child_id, child_name, child_dob, outbound_child_payment_ref, ccp_reg_reference, ccp_postcode)
-      VALUES (${child_id}, ${name}, ${DOB}, ${TFC}, ${ccp_ref}, ${ccp_pc})
+      INSERT INTO children (child_id, user_id, child_name, child_dob, outbound_child_payment_ref, ccp_reg_reference, ccp_postcode)
+      VALUES (${childId}, ${userId}, ${name}, ${DOB}, ${TFC}, ${ccp_ref}, ${ccp_pc})
     `;
-    console.log("Child successfully added:", { child_id, name, DOB, TFC, ccp_ref, ccp_pc });
-    return { success: true, childId: child_id };  // Return childId here
+    console.log("Child successfully added:", { childId, userId, name, DOB, TFC, ccp_ref, ccp_pc });
+    return { success: true, childId };
   } catch (error) {
     console.error("Database Error:", error);
-    return { success: false, error: "Database Error: Failed to Create Account." };  // Return error object
+    return { success: false, error: "Database Error: Failed to Create Account." };
   }
 }
-
-export async function fetchInvoiceDetails(invoiceId: string) {
-  const result = await sql`
-    SELECT invoice_id, payment_reference, estimated_payment_date, correlation_id
-    FROM invoices
-    WHERE invoice_id = ${invoiceId}
-  `;
-
-  return result.rows[0];  // Assuming you're using PostgreSQL, adjust according to your database
-}
-
