@@ -1,71 +1,100 @@
-import { NextResponse } from 'next/server';
-import { sql } from '@vercel/postgres';
+import { NextResponse } from "next/server";
+import { sql } from "@vercel/postgres";
 
-export async function POST(request: Request) {
+export async function POST(req: Request) {
   try {
-    const { institutionId, amount, invoiceId } = await request.json();
+    // Parse the request body
+    const { invoiceId, amount, institutionId } = await req.json();
 
-    // Query to fetch outbound_child_payment_ref from the database
-    const result = await sql`
-  SELECT c.outbound_child_payment_ref
-  FROM invoices i
-  JOIN children c ON i.child_id = c.child_id
-  WHERE i.invoice_id = ${invoiceId}
-  LIMIT 1;
-`;
+    if (!invoiceId || !amount || !institutionId) {
+      return NextResponse.json(
+        { error: "Missing required fields: invoiceId, amount, or institutionId" },
+        { status: 400 }
+      );
+    }
 
-if (!result.rows.length) {
-  console.error('No outbound_child_payment_ref found for invoiceId:', invoiceId);
-  return NextResponse.json({ error: 'No outbound_child_payment_ref found for the given invoice' });
-}
+    // Retrieve outbound_child_payment_ref from the database
+    const { rows: invoiceRows } = await sql`
+      SELECT c.outbound_child_payment_ref
+      FROM invoices i
+      INNER JOIN children c ON i.child_id = c.id
+      WHERE i.id = ${invoiceId}
+    `;
 
-    const outboundChildPaymentRef = result.rows[0].outbound_child_payment_ref;
+    if (invoiceRows.length === 0) {
+      return NextResponse.json(
+        { error: "Invoice not found or no matching child record" },
+        { status: 404 }
+      );
+    }
 
-    // Build the Yapily payment request body
-    const body = {
-      applicationUserId: 'single-payment-tutorial',
+    const outboundChildPaymentRef = invoiceRows[0].outbound_child_payment_ref;
+
+    if (!outboundChildPaymentRef) {
+      return NextResponse.json(
+        { error: "Outbound child payment reference not found" },
+        { status: 404 }
+      );
+    }
+
+    // Construct the payload for the Yapily API
+    const payload = {
+      applicationUserId: outboundChildPaymentRef,
       institutionId,
-      callback: 'https://display-parameters.com/',
+      callback: "https://your-callback-url.com/", // Replace with your actual callback URL
       paymentRequest: {
-        type: 'DOMESTIC_PAYMENT',
-        reference: outboundChildPaymentRef,
-        paymentIdempotencyId: new Date().toISOString(),
+        type: "DOMESTIC_PAYMENT",
+        reference: `Payment-${outboundChildPaymentRef}`,
+        paymentIdempotencyId: `payment-${Date.now()}`,
         amount: {
           amount,
-          currency: 'GBP',
+          currency: "GBP", // Assuming GBP as the currency
         },
         payee: {
-          name: 'BILLS COFFEE LTD',
+          name: "Recipient Name", // Replace with recipient's name dynamically if needed
           accountIdentifications: [
-            { type: 'ACCOUNT_NUMBER', identification: '{accountNumber}' },
-            { type: 'SORT_CODE', identification: '{sortCode}' },
+            { type: "ACCOUNT_NUMBER", identification: "12345678" }, // Replace dynamically if needed
+            { type: "SORT_CODE", identification: "12-34-56" }, // Replace dynamically if needed
           ],
         },
       },
     };
 
-    // Call the Yapily API
-    const response = await fetch('https://api.yapily.com/payment-auth-requests', {
-      method: 'POST',
+    const APPLICATION_KEY = process.env.YAPILY_APPLICATION_ID;
+    const APPLICATION_SECRET = process.env.YAPILY_APPLICATION_SECRET;
+
+    // Make the Yapily API request
+    const response = await fetch("https://api.yapily.com/payment-auth-requests", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Basic ${Buffer.from(
-          `${process.env.YAPILY_APPLICATION_ID}:${process.env.YAPILY_APPLICATION_SECRET}`
-        ).toString('base64')}`,
+        "Content-Type": "application/json",
+        Authorization: `Basic ${Buffer.from("APPLICATION_KEY:APPLICATION_SECRET").toString(
+          "base64"
+        )}`, // Replace with your actual Yapily credentials
       },
-      body: JSON.stringify(body),
+      body: JSON.stringify(payload),
     });
 
-    const responseData = await response.json();
-
     if (!response.ok) {
-      console.error('Error from Yapily API:', responseData);
-      return NextResponse.json({ error: responseData }, { status: response.status });
+      const error = await response.json();
+      console.error("Yapily API error:", error);
+      return NextResponse.json({ error: "Failed to create payment authorization" }, { status: 500 });
     }
 
-    return NextResponse.json({ success: responseData });
+    const data = await response.json();
+    const authorisationUrl = data.data.authorisationUrl;
+
+    if (!authorisationUrl) {
+      return NextResponse.json(
+        { error: "Authorisation URL not returned from Yapily API" },
+        { status: 500 }
+      );
+    }
+
+    // Return the authorisation URL
+    return NextResponse.json({ authorisationUrl });
   } catch (error) {
-    console.error('Server error:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    console.error("Error in payment request handler:", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

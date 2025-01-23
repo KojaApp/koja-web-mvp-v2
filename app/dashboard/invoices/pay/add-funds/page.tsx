@@ -50,6 +50,15 @@ export default function AddFundsPage() {
   console.log("Institutions State:", institutions); // Check institutions state before rendering
 
   const handlePaymentRequest = async (institutionId: string) => {
+    const invoiceId = searchParams.get('invoiceId'); // Extract invoiceId from query params
+    console.log('Extracted invoiceId:', invoiceId); // Debugging statement
+  
+    if (!invoiceId) {
+      alert('Invoice ID is missing from the URL.');
+      console.error('Invoice ID is missing from the URL.');
+      return;
+    }
+  
     try {
       const response = await fetch('/api/dashboard/invoices/pay/create-payment', {
         method: 'POST',
@@ -57,8 +66,8 @@ export default function AddFundsPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          institutionId,
-          amount: amount,
+          invoiceId, // Correctly include invoiceId
+          amount,    // Pass amount if needed
         }),
       });
   
@@ -75,6 +84,7 @@ export default function AddFundsPage() {
       console.error('Client Error:', error);
     }
   };
+  
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
