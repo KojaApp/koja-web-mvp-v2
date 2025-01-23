@@ -161,7 +161,7 @@ export default function PayInvoicePage() {
             <>
               <div className="mt-8 mb-4"><p>You currently have insufficient funds in your Tax Free Childcare account to pay this invoice.</p></div>
 
-              <AddFunds amount={amount} />
+              <AddFunds amount={amount} invoiceId={id} />
               
             </>
           )}

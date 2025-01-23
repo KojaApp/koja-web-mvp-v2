@@ -79,8 +79,8 @@ export function DeleteInvoice({ id }: { id: string }) {
   );
 }
 
-export function AddFunds({ amount }: { amount: number }) {
-  console.log("AddFunds Props:", { amount }); // Debugging
+export function AddFunds({ amount, invoiceId }: { amount: number, invoiceId: string }) {
+  console.log("AddFunds Props:", { amount, invoiceId });
 
   return (
     <Link
@@ -89,6 +89,7 @@ export function AddFunds({ amount }: { amount: number }) {
         pathname: '/dashboard/invoices/pay/add-funds',
         query: {
           amount,
+          invoiceId, // Pass invoiceId as a query param
         },
       }}
     >
