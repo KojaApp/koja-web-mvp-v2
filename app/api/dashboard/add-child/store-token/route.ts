@@ -13,24 +13,36 @@ export async function POST(request: Request) {
     const clientSecret = process.env.HMRC_CLIENT_SECRET;
     const redirectUri = 'http://localhost:3000/dashboard/add-child/link-tfc-callback';
 
-    const response = await fetch('https://test-api.service.hmrc.gov.uk/oauth/token', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams({
-        client_id: clientId,
-        client_secret: clientSecret,
-        grant_type: 'authorization_code',
-        redirect_uri: redirectUri,
-        code: code,
-      }),
-    });
+    // Ensure all required parameters are defined
+if (!clientId || !clientSecret || !redirectUri) {
+  throw new Error('Missing required parameters for token exchange.');
+}
 
-    const data = await response.json();
+// Proceed with the request
+const response = await fetch('https://test-api.service.hmrc.gov.uk/oauth/token', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/x-www-form-urlencoded',
+  },
+  body: new URLSearchParams({
+    client_id: clientId,
+    client_secret: clientSecret,
+    grant_type: 'authorization_code',
+    redirect_uri: redirectUri,
+    code: code,
+  }).toString(), // Ensure URLSearchParams is serialized to a string
+});
 
-    if (!response.ok) {
-      return NextResponse.json({ success: false, error: data.error_description }, { status: response.status });
-    }
+// Check if response is successful
+if (!response.ok) {
+  const error = await response.json();
+  console.error("HMRC OAuth error:", error);
+  throw new Error('Failed to exchange authorization code for token');
+}
 
+// Process the response
+const data = await response.json();
+console.log('Token exchange successful:', data);
     // Save the tokens in the database
     await sql`
       UPDATE children
