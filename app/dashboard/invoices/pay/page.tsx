@@ -150,7 +150,7 @@ export default function PayInvoicePage() {
           </div>
 
           {/* Conditional Button */}
-          {hmrcData.cleared_funds / 100 > amount ? (
+          {hmrcData.cleared_funds / 100 >= amount ? (
             <button
               onClick={handlePayTFC}
               className="mt-4 px-6 py-2 bg-green-600 text-white font-medium rounded hover:bg-green-700"
