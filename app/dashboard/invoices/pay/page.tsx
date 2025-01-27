@@ -122,7 +122,7 @@ export default function PayInvoicePage() {
         <div className="grid grid-cols-2 gap-4">
           <div><p><strong>Name:</strong> </p></div> <div><p>{name}</p></div>
           <div><p><strong>Amount:</strong> </p></div> <div><p>£{amount}</p></div>
-          <div><p><strong>Payment Due By:</strong> </p></div> <div><p>{formatDateToLocal(date)}</p></div>
+          <div><p><strong>Payment Due By:</strong> </p></div> <div><p>{date ? formatDateToLocal(date) : 'No due date provided'}</p></div>
         </div>
       </section>
 
@@ -174,7 +174,7 @@ export default function PayInvoicePage() {
           <h2 className="text-xl font-medium mb-4">Payment Details</h2>
           <div className="grid grid-cols-2 gap-4">
             <div><p><strong>Payment Reference:</strong></p></div> <div><p>{paymentDetails.paymentReference}</p></div>
-            <div><p><strong>Estimated Payment Date:</strong></p></div> <div><p>{formatDateToLocal(paymentDetails.estimatedPaymentDate)}</p></div>
+            <div><p><strong>Estimated Payment Date:</strong></p></div> <div><p> {paymentDetails.estimatedPaymentDate ? formatDateToLocal(paymentDetails.estimatedPaymentDate) : 'No due date provided'}</p></div>
           </div>
         </section>
       )}
