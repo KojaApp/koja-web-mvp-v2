@@ -8,7 +8,7 @@ import { sql } from '@vercel/postgres';
 import { redirect } from 'next/navigation';
 import { getSession } from 'next-auth/react';
 import NextAuth from "next-auth"
-import { AuthError } from 'next-auth';
+import { AuthError } from "@auth/core/errors";
 import { auth } from "@/auth";
 
 const RegisterUser = z.object({
