@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 
-export default function AddFundsPage() {
+function AddFundsContent() {
   const searchParams = useSearchParams();
   const amount = parseFloat(searchParams.get('amount') || '0');
 
@@ -104,5 +104,13 @@ export default function AddFundsPage() {
         !loading && !error && <p>No institutions available.</p>
       )}
     </div>
+  );
+}
+
+export default function AddFundsPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <AddFundsContent />
+    </Suspense>
   );
 }
