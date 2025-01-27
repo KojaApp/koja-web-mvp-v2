@@ -66,15 +66,18 @@ export default function AddFundsPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          invoiceId, // Correctly include invoiceId
-          amount,    // Pass amount if needed
+          invoiceId,  // Include invoiceId
+          amount,     // Include amount
+          institutionId, // Include institutionId
         }),
       });
   
       const result = await response.json();
       if (response.ok) {
-        alert('Payment request created successfully!');
-        console.log('Payment request:', result.success);
+        const { authorisationUrl } = result;
+        alert('Payment request created successfully! Redirecting to bank...');
+        console.log('Payment request:', result);
+        window.location.href = authorisationUrl; // Redirect to the authorization URL
       } else {
         alert(`Error: ${result.error.message}`);
         console.error('API Error:', result.error);

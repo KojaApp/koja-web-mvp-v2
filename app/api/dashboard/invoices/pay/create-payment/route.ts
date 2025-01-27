@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import { sql } from "@vercel/postgres";
+import { v4 as uuidv4 } from "uuid";
 
 export async function POST(req: Request) {
   try {
-    // Parse the request body
     const { invoiceId, amount, institutionId } = await req.json();
 
     if (!invoiceId || !amount || !institutionId) {
@@ -13,12 +13,11 @@ export async function POST(req: Request) {
       );
     }
 
-    // Retrieve outbound_child_payment_ref from the database
     const { rows: invoiceRows } = await sql`
       SELECT c.outbound_child_payment_ref
       FROM invoices i
-      INNER JOIN children c ON i.child_id = c.id
-      WHERE i.id = ${invoiceId}
+      INNER JOIN children c ON i.child_id = c.child_id
+      WHERE i.invoice_id = ${invoiceId}
     `;
 
     if (invoiceRows.length === 0) {
@@ -29,6 +28,10 @@ export async function POST(req: Request) {
     }
 
     const outboundChildPaymentRef = invoiceRows[0].outbound_child_payment_ref;
+    const paymentIdempotencyId = uuidv4();
+    const applicationKey = process.env.YAPILY_APPLICATION_ID;
+    const applicationSecret = process.env.YAPILY_APPLICATION_SECRET;
+    const encodedCredentials = Buffer.from(`${applicationKey}:${applicationSecret}`).toString("base64");
 
     if (!outboundChildPaymentRef) {
       return NextResponse.json(
@@ -37,52 +40,51 @@ export async function POST(req: Request) {
       );
     }
 
-    // Construct the payload for the Yapily API
     const payload = {
-      applicationUserId: outboundChildPaymentRef,
+      applicationUserId: applicationKey,
       institutionId,
-      callback: "https://your-callback-url.com/", // Replace with your actual callback URL
+      callback: "https://auth.yapily.com/",
       paymentRequest: {
         type: "DOMESTIC_PAYMENT",
-        reference: `Payment-${outboundChildPaymentRef}`,
-        paymentIdempotencyId: `payment-${Date.now()}`,
+        reference: `Payment-${outboundChildPaymentRef}`.substring(0, 18),
+        paymentIdempotencyId: paymentIdempotencyId.substring(0, 35),
         amount: {
           amount,
-          currency: "GBP", // Assuming GBP as the currency
+          currency: "GBP",
         },
         payee: {
-          name: "Recipient Name", // Replace with recipient's name dynamically if needed
+          name: "Recipient Name",
           accountIdentifications: [
-            { type: "ACCOUNT_NUMBER", identification: "12345678" }, // Replace dynamically if needed
-            { type: "SORT_CODE", identification: "12-34-56" }, // Replace dynamically if needed
+            { type: "ACCOUNT_NUMBER", identification: "12345678" },
+            { type: "SORT_CODE", identification: "123456" },
           ],
         },
       },
     };
 
-    const APPLICATION_KEY = process.env.YAPILY_APPLICATION_ID;
-    const APPLICATION_SECRET = process.env.YAPILY_APPLICATION_SECRET;
-
-    // Make the Yapily API request
     const response = await fetch("https://api.yapily.com/payment-auth-requests", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Basic ${Buffer.from("APPLICATION_KEY:APPLICATION_SECRET").toString(
-          "base64"
-        )}`, // Replace with your actual Yapily credentials
+        Authorization: `Basic ${encodedCredentials}`,
       },
       body: JSON.stringify(payload),
     });
+    
+    console.log("Headers:", {
+      "Content-Type": "application/json",
+      Authorization: `Basic ${encodedCredentials}`,
+    });
+    console.log("Payload:", JSON.stringify(payload, null, 2));
 
     if (!response.ok) {
       const error = await response.json();
       console.error("Yapily API error:", error);
-      return NextResponse.json({ error: "Failed to create payment authorization" }, { status: 500 });
+      return NextResponse.json({ error: "Failed to authorize", details: error }, { status: response.status });
     }
 
     const data = await response.json();
-    const authorisationUrl = data.data.authorisationUrl;
+    const authorisationUrl = data?.data?.authorisationUrl;
 
     if (!authorisationUrl) {
       return NextResponse.json(
@@ -91,7 +93,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // Return the authorisation URL
     return NextResponse.json({ authorisationUrl });
   } catch (error) {
     console.error("Error in payment request handler:", error);
