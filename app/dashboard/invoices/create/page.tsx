@@ -6,6 +6,8 @@ import { fetchChildren } from '@/app/lib/data';
 //export default async function Page() { //
   // const customers = await fetchCustomers(); //
 
+  export const dynamic = 'force-dynamic';
+
   export default async function Page() { 
   const children = await fetchChildren(); 
  
