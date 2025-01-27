@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Image from 'next/image'
+import Link from 'next/link';
 
 export default function AddFundsPage() {
   const searchParams = useSearchParams();
@@ -48,9 +49,50 @@ export default function AddFundsPage() {
 
   console.log("Institutions State:", institutions); // Check institutions state before rendering
 
+  const handlePaymentRequest = async (institutionId: string) => {
+    const invoiceId = searchParams.get('invoiceId'); // Extract invoiceId from query params
+    console.log('Extracted invoiceId:', invoiceId); // Debugging statement
+  
+    if (!invoiceId) {
+      alert('Invoice ID is missing from the URL.');
+      console.error('Invoice ID is missing from the URL.');
+      return;
+    }
+  
+    try {
+      const response = await fetch('/api/dashboard/invoices/pay/create-payment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          invoiceId,  // Include invoiceId
+          amount,     // Include amount
+          institutionId, // Include institutionId
+        }),
+      });
+  
+      const result = await response.json();
+      if (response.ok) {
+        const { authorisationUrl } = result;
+        alert('Payment request created successfully! Redirecting to bank...');
+        console.log('Payment request:', result);
+        window.location.href = authorisationUrl; // Redirect to the authorization URL
+      } else {
+        alert(`Error: ${result.error.message}`);
+        console.error('API Error:', result.error);
+      }
+    } catch (error) {
+      alert('An unexpected error occurred.');
+      console.error('Client Error:', error);
+    }
+  };
+  
+
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
       <h1 className="text-2xl font-semibold mb-4">Add Funds</h1>
+      <p className="mb-4">Select your bank from the list below to set up your payment.</p>
 
       {/* Loading and Error Handling */}
       {loading && <p>Loading institutions...</p>}
@@ -58,19 +100,25 @@ export default function AddFundsPage() {
 
       {/* Institutions List */}
       {!loading && !error && meta?.count > 0 ? (
-        <ul className="list-disc list-inside bg-white p-4 rounded shadow">
-          {institutions.map((institution: any) => (
-            <li key={institution.id}>
-                <Image
-      src="{institution.image}"
-      width={500}
-      height={500}
-      alt="Picture of the author"
-    />
-              <p className="font-medium">{institution.name}</p>
+        <ul className="list-none bg-white p-4 rounded shadow divide-y divide-gray-200">
+        {institutions.map((institution: any) => {
+          const logo = institution.media?.find((item: any) => item.type === 'logo')?.source;
+      
+          return (
+            <li key={institution.id} className="py-4 flex items-center space-x-4">
+              {logo && <img src={logo} alt={`${institution.name} logo`} className="w-10 h-auto rounded" />}
+              <div>
+              <button
+                onClick={() => handlePaymentRequest(institution.id)}
+                aria-label={`Initiate payment for ${institution.name}`}
+              >
+                <p className="font-medium">{institution.name}</p>
+                </button>  
+              </div>
             </li>
-          ))}
-        </ul>
+          );
+        })}
+      </ul>
       ) : (
         !loading && !error && <p>No institutions available.</p>
       )}
