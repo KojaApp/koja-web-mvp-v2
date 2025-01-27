@@ -6,4 +6,10 @@ const nextConfig: NextConfig = {
   },
 };
 
+module.exports = {
+  experimental: {
+    turbopack: false,
+  },
+};
+
 export default nextConfig;
