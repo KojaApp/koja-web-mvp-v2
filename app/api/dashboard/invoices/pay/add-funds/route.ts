@@ -43,14 +43,22 @@ export async function GET() {
     console.log('Institutions fetched successfully:', data);
 
     return NextResponse.json({ institutions: data });
-  } catch (error) {
-    console.error('Unexpected error in API route:', error);
-    return NextResponse.json(
-      { error: 'An unexpected error occurred.', details: error.message },
-      { status: 500 }
-    );
-  }
-}
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error('Unexpected error in API route:', error);
+      return NextResponse.json(
+        { error: 'An unexpected error occurred.', details: error.message },
+        { status: 500 }
+      );
+    } else {
+      // Handle the case where error is not an instance of Error
+      console.error('Unexpected error type:', error);
+      return NextResponse.json(
+        { error: 'An unexpected error occurred.', details: 'Unknown error type' },
+        { status: 500 }
+      );
+    }
+  }}
 
 // Remove or comment out the POST handler for testing
 // export function POST() {
