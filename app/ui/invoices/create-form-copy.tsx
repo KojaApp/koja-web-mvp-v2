@@ -32,7 +32,7 @@ export default function AddInvoiceForm({ children, ...props } : any) {
   defaultValue=""
   onChange={(e) => {
     const selectedOption = e.target.options[e.target.selectedIndex];
-    const childNameInput = document.getElementById("childName");
+    const childNameInput = document.getElementById("childName") as HTMLInputElement;
     if (childNameInput) {
       childNameInput.value = selectedOption.text;
     }
