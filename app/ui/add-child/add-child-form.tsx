@@ -21,24 +21,24 @@ export default function AddChildForm() {
     }
   
     setIsPending(true);
-    try {
-      const result = await addChild(null, formData); // Add child to the database
-  
-      if (result.success) {
-        setIsSuccess(true);
-        setErrorMessage(null);
-        setChildId(result.childId); // Store the childId
-      } else {
-        setIsSuccess(false);
-        setErrorMessage(result.error);
-      }
-    } catch (error) {
-      setIsPending(false);
-      setIsSuccess(false);
-      setErrorMessage("An unexpected error occurred.");
-      console.error("Error:", error);
-    }
-    setIsPending(false);
+try {
+  const result = await addChild(null, formData); // Add child to the database
+
+  if (result.success) {
+    setIsSuccess(true);
+    setErrorMessage(null); // Explicitly set to `null`
+    setChildId(result.childId ?? null); // Convert `undefined` to `null`
+  } else {
+    setIsSuccess(false);
+    setErrorMessage(result.error ?? null); // Convert `undefined` to `null`
+  }
+} catch (error) {
+  setIsPending(false);
+  setIsSuccess(false);
+  setErrorMessage("An unexpected error occurred."); // This is already a string
+  console.error("Error:", error);
+}
+setIsPending(false);
   };
 
   const handleHmrcRedirect = () => {
