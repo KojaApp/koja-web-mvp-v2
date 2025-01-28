@@ -13,6 +13,10 @@ export async function POST(request: Request) {
     const clientSecret = process.env.HMRC_CLIENT_SECRET;
     const redirectUri = 'http://localhost:3000/dashboard/add-child/link-tfc-callback';
 
+    if (!clientId || !clientSecret || !code || !redirectUri) {
+      return NextResponse.json({ error: 'Missing required parameters' }, { status: 400 });
+    }
+
     const response = await fetch('https://test-api.service.hmrc.gov.uk/oauth/token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -21,7 +25,7 @@ export async function POST(request: Request) {
         client_secret: clientSecret,
         grant_type: 'authorization_code',
         redirect_uri: redirectUri,
-        code: code,
+        code: String(code),
       }),
     });
 
