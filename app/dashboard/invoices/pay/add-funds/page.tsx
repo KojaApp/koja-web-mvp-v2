@@ -120,7 +120,7 @@ export default function AddFundsPage() {
         })}
       </ul>
       ) : (
-        !loading && !error && <p>No institutions available.</p>
+        !loading && !error && <p>No institutions are available.</p>
       )}
     </div>
   );
