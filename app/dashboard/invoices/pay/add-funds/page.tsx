@@ -53,13 +53,13 @@ export default function AddFundsPage() {
   const handlePaymentRequest = async (institutionId: string) => {
     const invoiceId = searchParams.get('invoiceId'); // Extract invoiceId from query params
     console.log('Extracted invoiceId:', invoiceId); // Debugging statement
-  
+    unstable_noStore()
     if (!invoiceId) {
       alert('Invoice ID is missing from the URL.');
       console.error('Invoice ID is missing from the URL.');
       return;
     }
-    unstable_noStore()
+   
     try {
       const response = await fetch('/api/dashboard/invoices/pay/create-payment', {
         method: 'POST',
