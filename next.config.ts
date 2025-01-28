@@ -12,4 +12,10 @@ module.exports = {
   },
 };
 
+module.exports = {
+  experimental: {
+    missingSuspenseWithCSRBailout: false,
+  },
+}
+
 export default nextConfig;
