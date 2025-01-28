@@ -186,32 +186,21 @@ export async function fetchCustomers() {
 
 export async function fetchChildren() {
   try {
-    // Retrieve the authenticated user's session using email to get user.id
-    const session = await auth();  // Or use getSession() if you're using that
-    console.log('Session data:', session);  // Log the session to see the structure
+    const session = await auth();
     if (!session || !session.user) {
       throw new Error('User not authenticated.');
     }
 
     const userEmail = session.user.email;
-    console.log('User Email:', userEmail);  // Log the email
-
-    // Query the database to get the user ID from the email
     const userQuery = await sql`
       SELECT id FROM users WHERE email = ${userEmail}
     `;
-    console.log('User query result:', userQuery);  // Log the query result to check if we get the ID
-
-    const userId = userQuery.rows[0]?.id;  // Make sure to access the correct row to get the id
+    const userId = userQuery.rows[0]?.id;
 
     if (!userId) {
       throw new Error('User not found for email: ' + userEmail);
     }
 
-    // Debug: log the userId before querying children
-    console.log('User ID:', userId);
-
-    // Corrected query to fetch the user's children
     const data = await sql<ChildField>`
       SELECT
         child_id,
@@ -220,13 +209,10 @@ export async function fetchChildren() {
       WHERE user_id = ${userId} 
       ORDER BY child_name ASC
     `;
-
-    console.log('Fetched children data:', data);  // Log the fetched data
-    const children = data.rows;
-    return children;
+    return data.rows;  // Return the children data
   } catch (err) {
-    console.error('Database Error:', err);
-    throw new Error('Failed to fetch children for the authenticated user.');
+    console.error('Error fetching children:', err);
+    return [];  // Return an empty array if there's an error
   }
 }
 
