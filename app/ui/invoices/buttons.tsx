@@ -79,7 +79,7 @@ export function DeleteInvoice({ id }: { id: string }) {
   );
 }
 
-export function AddFunds({ amount, invoiceId }: { amount: number, invoiceId: string }) {
+export function AddFunds({ amount, invoiceId }: { amount: number, invoiceId: string | null }) {
   console.log("AddFunds Props:", { amount, invoiceId });
 
   return (

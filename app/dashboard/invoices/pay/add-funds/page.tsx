@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
-import Image from 'next/image'
+import Image from 'next/image';
 import Link from 'next/link';
 
 export default function AddFundsPage() {
@@ -10,7 +10,7 @@ export default function AddFundsPage() {
   const amount = parseFloat(searchParams.get('amount') || '0');
 
   const [institutions, setInstitutions] = useState<any[]>([]);
-  const [meta, setMeta] = useState<{ count: number } | null>(null);
+  const [meta, setMeta] = useState<{ count: number }>({ count: 0 }); // Initialize count to 0
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
 
@@ -34,7 +34,7 @@ export default function AddFundsPage() {
 
         // Set state based on the fetched data
         setInstitutions(institutionsData);
-        setMeta(responseData.institutions?.meta || { count: 0 });
+        setMeta(responseData.institutions?.meta || { count: 0 }); // Ensure meta always has count
       } else {
         console.error("API Error:", responseData.error);
         setError(true);
@@ -87,7 +87,6 @@ export default function AddFundsPage() {
       console.error('Client Error:', error);
     }
   };
-  
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
@@ -101,24 +100,24 @@ export default function AddFundsPage() {
       {/* Institutions List */}
       {!loading && !error && meta?.count > 0 ? (
         <ul className="list-none bg-white p-4 rounded shadow divide-y divide-gray-200">
-        {institutions.map((institution: any) => {
-          const logo = institution.media?.find((item: any) => item.type === 'logo')?.source;
+          {institutions.map((institution: any) => {
+            const logo = institution.media?.find((item: any) => item.type === 'logo')?.source;
       
-          return (
-            <li key={institution.id} className="py-4 flex items-center space-x-4">
-              {logo && <img src={logo} alt={`${institution.name} logo`} className="w-10 h-auto rounded" />}
-              <div>
-              <button
-                onClick={() => handlePaymentRequest(institution.id)}
-                aria-label={`Initiate payment for ${institution.name}`}
-              >
-                <p className="font-medium">{institution.name}</p>
-                </button>  
-              </div>
-            </li>
-          );
-        })}
-      </ul>
+            return (
+              <li key={institution.id} className="py-4 flex items-center space-x-4">
+                {logo && <img src={logo} alt={`${institution.name} logo`} className="w-10 h-auto rounded" />}
+                <div>
+                  <button
+                    onClick={() => handlePaymentRequest(institution.id)}
+                    aria-label={`Initiate payment for ${institution.name}`}
+                  >
+                    <p className="font-medium">{institution.name}</p>
+                  </button>  
+                </div>
+              </li>
+            );
+          })}
+        </ul>
       ) : (
         !loading && !error && <p>No institutions are available.</p>
       )}
