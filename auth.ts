@@ -5,6 +5,11 @@ import { sql } from '@vercel/postgres';
 import { z } from 'zod';
 import type { User } from '@/app/lib/definitions';
 import bcrypt from 'bcrypt';
+import { signIn as nextAuthSignIn, signOut as nextAuthSignOut, getSession } from 'next-auth/react';
+
+export const signIn = nextAuthSignIn;
+export const signOut = nextAuthSignOut;
+export const getSessionFromAuth = getSession;
 
 async function getUser(email: string): Promise<User | undefined> {
   try {
