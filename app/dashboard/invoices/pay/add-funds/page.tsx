@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
+import { unstable_noStore } from 'next/cache'
 
 export default function AddFundsPage() {
   const searchParams = useSearchParams();
@@ -21,7 +22,7 @@ export default function AddFundsPage() {
   const fetchInstitutions = async () => {
     setLoading(true);
     setError(false);
-
+    unstable_noStore()
     try {
       const response = await fetch(`/api/dashboard/invoices/pay/add-funds?amount=${amount}`);
       const responseData = await response.json();
@@ -58,7 +59,7 @@ export default function AddFundsPage() {
       console.error('Invoice ID is missing from the URL.');
       return;
     }
-  
+    unstable_noStore()
     try {
       const response = await fetch('/api/dashboard/invoices/pay/create-payment', {
         method: 'POST',
