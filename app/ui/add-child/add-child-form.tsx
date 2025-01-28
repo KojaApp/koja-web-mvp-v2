@@ -27,10 +27,10 @@ export default function AddChildForm() {
       if (result.success) {
         setIsSuccess(true);
         setErrorMessage(null);
-        setChildId(result.childId); // Store the childId
+        setChildId(result.childId ?? null); // Store the childId
       } else {
         setIsSuccess(false);
-        setErrorMessage(result.error);
+        setErrorMessage(result.error ?? null);
       }
     } catch (error) {
       setIsPending(false);
