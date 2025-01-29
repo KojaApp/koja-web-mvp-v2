@@ -8,10 +8,8 @@ This is the prototype for the Koja Web Appp
 - Add children & link TFC account (via HMRC Sandbox API)
 - Add invoices
 - Check TFC account balances (via HMRC Sandbox API)
+-  HMRC Sandbox API payment integration
 
 ## Next features to be added
 
 - Yapily integration (single payment)
-- HMRC Sandbox API payment integration
-- Pay invoices functionality
-
