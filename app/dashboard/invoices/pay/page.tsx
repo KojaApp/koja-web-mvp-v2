@@ -6,10 +6,9 @@ export default async function PayInvoicePage({
 }: {
   searchParams: Record<string, string | undefined>;
 }) {
-  // Ensure the searchParams are awaited (if async data is being fetched)
+  // Await searchParams directly
   const resolvedParams = await searchParams;
 
-  // Now, we pass the resolvedParams to the client-side component
   return (
     <Suspense fallback={<p>Loading...</p>}>
       <PayInvoiceClient searchParams={resolvedParams} />
