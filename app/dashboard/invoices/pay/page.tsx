@@ -4,14 +4,10 @@ import PayInvoiceClient from 'app/ui/invoices/payinvoiceclient';
 export default async function PayInvoicePage({
   searchParams,
 }: {
-  searchParams: Record<string, string | undefined>;
+  searchParams: Promise<Record<string, string | undefined>>;
 }) {
-  // Await searchParams directly
+  // Await searchParams before passing to the client-side component
   const resolvedParams = await searchParams;
 
-  return (
-    <Suspense fallback={<p>Loading....</p>}>
-      <PayInvoiceClient searchParams={resolvedParams} />
-    </Suspense>
-  );
+  return <PayInvoiceClient searchParams={resolvedParams} />;
 }
