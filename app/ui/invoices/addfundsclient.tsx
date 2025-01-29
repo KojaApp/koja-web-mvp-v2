@@ -109,7 +109,7 @@ export default function AddFundsClient() {
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
       <h1 className="text-2xl font-semibold mb-4">Add Funds</h1>
-      <p className="mb-4">Select your bank from the list below to set up your payment.</p>
+      <p className="mb-4">Select your bank from the list below to start setting up your payment.</p>
 
       <InstitutionsList amount={amount} handlePaymentRequest={handlePaymentRequest} />
     </div>
