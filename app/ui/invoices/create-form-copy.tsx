@@ -32,10 +32,10 @@ export default function AddInvoiceForm({ children, ...props } : any) {
   defaultValue=""
   onChange={(e) => {
     const selectedOption = e.target.options[e.target.selectedIndex];
-    const childNameInput = document.getElementById("childName");
-    if (childNameInput) {
-      childNameInput.value = selectedOption.text;
-    }
+    const childNameInput = document.getElementById("childName") as HTMLInputElement;
+if (childNameInput) {
+  childNameInput.value = selectedOption.text;
+}
   }}
 >
   <option value="" disabled>Select a child</option>

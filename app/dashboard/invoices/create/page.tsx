@@ -1,26 +1,23 @@
-//import Form from '@/app/ui/invoices/create-form';//
 import AddInvoiceForm from '@/app/ui/invoices/create-form-copy';
 import Breadcrumbs from '@/app/ui/invoices/breadcrumbs';
-//import { fetchCustomers } from '@/app/lib/data';//
 import { fetchChildren } from '@/app/lib/data';
-//export default async function Page() { //
-  // const customers = await fetchCustomers(); //
 
-  export default async function Page() { 
-  const children = await fetchChildren(); 
- 
+// Force dynamic rendering to support session-based fetching
+export const dynamic = "force-dynamic";
+
+export default async function Page() {
+  // Fetch children data dynamically
+  const children = await fetchChildren();
+
   return (
     <main>
       <Breadcrumbs
         breadcrumbs={[
           { label: 'Invoices', href: '/dashboard/invoices' },
-          {
-            label: 'Create Invoice',
-            href: '/dashboard/invoices/create',
-            active: true,
-          },
+          { label: 'Create Invoice', href: '/dashboard/invoices/create', active: true },
         ]}
       />
+      {/* Pass children data to the AddInvoiceForm */}
       <AddInvoiceForm children={children} />
     </main>
   );
