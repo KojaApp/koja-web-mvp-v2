@@ -10,7 +10,7 @@ export default async function PayInvoicePage({
   const resolvedParams = await searchParams;
 
   return (
-    <Suspense fallback={<p>Loading...</p>}>
+    <Suspense fallback={<p>Loading....</p>}>
       <PayInvoiceClient searchParams={resolvedParams} />
     </Suspense>
   );
