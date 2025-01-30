@@ -108,7 +108,7 @@ export default function PayInvoiceClient({
       </header>
 
       {/* Invoice Details Section */}
-      <section className="mb-6 bg-white p-4 rounded-lg shadow-md w-auto">
+      <section className="mb-6 bg-white p-4 rounded-lg shadow-md lg:w-1/2">
         <h2 className="text-xl font-medium mb-4">Invoice Details</h2>
         <div className="grid grid-cols-2 gap-4">
           <div><p><strong>Name:</strong></p></div> <div><p>{name}</p></div>
@@ -130,7 +130,7 @@ export default function PayInvoiceClient({
 
       {/* HMRC Account Data Section */}
       {hmrcData && (
-        <section className="mb-6 bg-white p-4 rounded-lg shadow-md w-auto">
+        <section className="mb-6 bg-white p-4 rounded-lg shadow-md lg:w-1/2">
           <h2 className="text-xl font-medium mb-4">HMRC Account Details</h2>
           <div className="grid grid-cols-2 gap-4">
             <div><p><strong>Account Status:</strong></p></div> <div><p>{hmrcData.tfc_account_status}</p></div>

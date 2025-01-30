@@ -43,7 +43,7 @@ export async function POST(req: Request) {
     const payload = {
       applicationUserId: applicationKey,
       institutionId,
-      callback: "https://development-auth.yapily.com/",
+      callback: "https://koja-web-mvp-v2.vercel.app/api/dashboard/invoices/pay/callback/",
       paymentRequest: {
         type: "DOMESTIC_PAYMENT",
         reference: `Payment-${outboundChildPaymentRef}`.substring(0, 18),
