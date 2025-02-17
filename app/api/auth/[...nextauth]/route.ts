@@ -1,14 +1,8 @@
 import NextAuth from "next-auth";
 import { authConfig } from "@/auth.config";
-import { NextRequest } from "next/server";
 
-// Wrap NextAuth inside an async function for App Router compatibility
-const handler = NextAuth(authConfig);
+// NextAuth() returns an object with "auth" and "handlers" properties in App Router
+const { handlers } = NextAuth(authConfig);
 
-export async function GET(req: NextRequest) {
-  return handler(req);
-}
-
-export async function POST(req: NextRequest) {
-  return handler(req);
-}
+export const GET = handlers.GET;
+export const POST = handlers.POST;
