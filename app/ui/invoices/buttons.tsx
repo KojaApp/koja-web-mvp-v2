@@ -1,5 +1,10 @@
-import { PencilIcon, PlusIcon, TrashIcon, CreditCardIcon } from '@heroicons/react/24/outline';
-import Link from 'next/link';
+import {
+  PencilIcon,
+  PlusIcon,
+  TrashIcon,
+  CreditCardIcon,
+} from "@heroicons/react/24/outline";
+import Link from "next/link";
 
 export function CreateInvoice() {
   return (
@@ -7,7 +12,7 @@ export function CreateInvoice() {
       href="/dashboard/invoices/create"
       className="flex h-10 items-center rounded-lg bg-[#F76C6C] px-4 text-sm font-medium text-white transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
     >
-      <span className="hidden md:block">Add Invoice</span>{' '}
+      <span className="hidden md:block">Add Invoice</span>{" "}
       <PlusIcon className="h-5 md:ml-4" />
     </Link>
   );
@@ -19,7 +24,7 @@ export function AddChild() {
       href="/dashboard/add-child"
       className="flex h-10 items-center rounded-lg bg-black px-4 text-sm font-medium text-white transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
     >
-      <span className="hidden md:block">Add Child</span>{' '}
+      <span className="hidden md:block">Add Child</span>{" "}
       <PlusIcon className="h-5 md:ml-4" />
     </Link>
   );
@@ -53,7 +58,7 @@ export function PayInvoice({
     <Link
       className="rounded-md border p-2 hover:bg-green-600 hover:text-white"
       href={{
-        pathname: '/dashboard/invoices/pay',
+        pathname: "/dashboard/invoices/pay",
         query: {
           id,
           name,
@@ -65,7 +70,6 @@ export function PayInvoice({
       Pay invoice
     </Link>
   );
-  
 }
 
 export function DeleteInvoice({ id }: { id: string }) {
@@ -79,14 +83,20 @@ export function DeleteInvoice({ id }: { id: string }) {
   );
 }
 
-export function AddFunds({ amount, invoiceId }: { amount: number, invoiceId: string | null }) {
+export function AddFunds({
+  amount,
+  invoiceId,
+}: {
+  amount: number;
+  invoiceId: string | null;
+}) {
   console.log("AddFunds Props:", { amount, invoiceId });
 
   return (
     <Link
       className="mt-4 px-6 py-2 bg-green-600 text-white font-medium rounded hover:bg-green-700"
       href={{
-        pathname: '/dashboard/invoices/pay/add-funds',
+        pathname: "/dashboard/invoices/pay/add-funds",
         query: {
           amount,
           invoiceId, // Pass invoiceId as a query param
