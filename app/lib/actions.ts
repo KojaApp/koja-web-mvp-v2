@@ -96,7 +96,7 @@ export async function register(
     return "Database Error: Failed to Create Account."
   }
 
-  redirect('/login')
+  redirect('/dashboard/add-child')
 }
 
  
