@@ -91,11 +91,16 @@ export async function register(
       VALUES (${id}, ${name}, ${email}, ${hashedPassword})
     `;
 
+  } catch (error) {
+    console.error('Registration Error:', error);
+    return "Database Error: Failed to Create Account.";
+  }
+
     // ✅ Call the email API route asynchronously
     const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/send`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ to: email, firstName: name }),
+      body: JSON.stringify({ to: email, firstName: name, type: 'registration', }),
     });
 
     const data = await res.json();
@@ -105,10 +110,7 @@ export async function register(
       console.error('Failed to send email:', data.error);
     }
 
-  } catch (error) {
-    console.error('Registration Error:', error);
-    return "Database Error: Failed to Create Account.";
-  }
+
 
   redirect('/dashboard/add-child');
 }

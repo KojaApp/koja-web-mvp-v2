@@ -1,23 +1,40 @@
-import { KojaVerificationEmail } from '@/email-templates/verification';
 import { Resend } from 'resend';
 import { NextResponse } from 'next/server';
+import { KojaVerificationEmail } from '@/email-templates/verification';
+import { KojaPaymentEmail } from '@/email-templates/payment-confirmation';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(req: Request) {
   try {
-    // Extract recipient email and name from request body
-    const { to, firstName } = await req.json();
+    const { to, firstName, type, extraData } = await req.json();
 
-    if (!to || !firstName) {
-      return NextResponse.json({ error: 'Missing email or first name' }, { status: 400 });
+    if (!to || !firstName || !type) {
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    }
+
+    let emailTemplate;
+    let subject;
+
+    // ✅ Dynamically select the correct email template
+    switch (type) {
+      case 'registration':
+        emailTemplate = KojaVerificationEmail({ firstName });
+        subject = 'Thanks for registering!';
+        break;
+      case 'password-reset':
+        emailTemplate = KojaPaymentEmail({ firstName, });
+        subject = 'Your payment has been created';
+        break;
+      default:
+        return NextResponse.json({ error: 'Invalid email type' }, { status: 400 });
     }
 
     const { data, error } = await resend.emails.send({
       from: 'Koja <onboarding@dev.trykoja.com>',
       to,
-      subject: 'Verify your email',
-      react: KojaVerificationEmail({ firstName }),
+      subject,
+      react: emailTemplate,
     });
 
     if (error) {
