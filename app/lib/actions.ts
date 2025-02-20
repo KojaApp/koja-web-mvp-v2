@@ -6,8 +6,6 @@ import {v4 as uuidv4} from "uuid"
 import z from 'zod';
 import { sql } from '@vercel/postgres';
 import { redirect } from 'next/navigation';
-import { getSession } from 'next-auth/react';
-import NextAuth from "next-auth"
 import { AuthError } from 'next-auth';
 import { auth } from "@/auth";
 

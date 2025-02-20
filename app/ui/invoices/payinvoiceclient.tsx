@@ -5,10 +5,12 @@ import { formatDateToLocal } from "@/app/lib/utils";
 import { montserrat } from "@/app/ui/fonts";
 import { AddFunds } from "@/app/ui/invoices/buttons";
 
-export default function PayInvoiceClient({
+export default async function PayInvoiceClient({
   searchParams,
+  userEmail,
 }: {
   searchParams: { [key: string]: string | undefined };
+  userEmail: string;
 }) {
   // Extract and process values safely
   const id = searchParams.id ?? null;
@@ -96,6 +98,19 @@ export default function PayInvoiceClient({
       setError("Payment failed. Please try again.");
     }
   };
+
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/send`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ to: userEmail, firstName: name, type: "payment" }),
+  });
+
+  const data = await res.json();
+  console.log("Email API Response:", data); // Debugging
+
+  if (!res.ok) {
+    console.error("Failed to send email:", data.error);
+  }
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
