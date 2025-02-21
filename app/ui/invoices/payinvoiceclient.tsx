@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { formatDateToLocal } from "@/app/lib/utils";
-import { montserrat } from "@/app/ui/fonts";
+import { opensans } from "@/app/ui/fonts";
 import { AddFunds } from "@/app/ui/invoices/buttons";
 
 export default function PayInvoiceClient({
@@ -98,6 +98,8 @@ export default function PayInvoiceClient({
               to: userEmail,
               firstName: name,
               type: "payment",
+              paymentReference: payment_reference,
+              paymentDate: estimated_payment_date,
             }),
           }
         );
@@ -120,7 +122,7 @@ export default function PayInvoiceClient({
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
       <header className="mb-6">
-        <h1 className={`${montserrat.className} text-2xl font-semibold`}>
+        <h1 className={`${opensans.className} text-2xl font-semibold`}>
           Pay Invoice
         </h1>
         <p className="text-sm text-gray-500">

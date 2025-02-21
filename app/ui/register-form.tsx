@@ -1,17 +1,17 @@
-'use client';
+"use client";
 
-import { montserrat } from '@/app/ui/fonts';
+import { opensans } from "@/app/ui/fonts";
 import {
   AtSymbolIcon,
   KeyIcon,
   ExclamationCircleIcon,
-  UserIcon
-} from '@heroicons/react/24/outline';
-import { ArrowRightIcon } from '@heroicons/react/20/solid';
-import { Button } from './button';
-import { useFormState, useFormStatus } from 'react-dom';
-import { register } from '@/app/lib/actions';
-import { useActionState } from 'react';
+  UserIcon,
+} from "@heroicons/react/24/outline";
+import { ArrowRightIcon } from "@heroicons/react/20/solid";
+import { Button } from "./button";
+import { useFormState, useFormStatus } from "react-dom";
+import { register } from "@/app/lib/actions";
+import { useActionState } from "react";
 
 export default function RegisterForm() {
   const [errorMessage, formAction] = useActionState(register, null);
@@ -19,7 +19,7 @@ export default function RegisterForm() {
   return (
     <form action={formAction} className="space-y-3">
       <div className="flex-1 rounded-lg bg-gray-50 px-6 pb-4 pt-8">
-        <h1 className={`${montserrat.className} mb-3 text-2xl`}>
+        <h1 className={`${opensans.className} mb-3 text-2xl`}>
           Register by email.
         </h1>
         <div className="w-full">

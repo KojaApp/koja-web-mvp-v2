@@ -1,4 +1,4 @@
-import PayInvoiceClient from "app/ui/invoices/payinvoiceclient";
+import PayInvoiceClient from "@/app/ui/invoices/payinvoiceclient";
 import { auth } from "@/auth";
 
 export default async function PayInvoicePage({
