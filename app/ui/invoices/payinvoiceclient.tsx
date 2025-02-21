@@ -255,9 +255,21 @@ export default function PayInvoiceClient({
               <p>
                 <strong>Payment Reference:</strong>
               </p>
-            </div>
+            </div>{" "}
             <div>
               <p>{paymentDetails.paymentReference}</p>
+            </div>
+            <div>
+              <p>
+                <strong>Estimated Payment Date:</strong>
+              </p>
+            </div>
+            <div>
+              <p>
+                {paymentDetails.estimatedPaymentDate
+                  ? formatDateToLocal(paymentDetails.estimatedPaymentDate)
+                  : "No due date provided"}
+              </p>
             </div>
           </div>
         </section>
