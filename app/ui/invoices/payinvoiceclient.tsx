@@ -27,40 +27,6 @@ export default function PayInvoiceClient({
   const rawDate = searchParams.date ?? null;
   const date = rawDate ? decodeURIComponent(rawDate) : null;
 
-  // Debugging log
-  useEffect(() => {
-    console.log("Client Component Loaded:", { searchParams, userEmail });
-
-    // ✅ Send email when component mounts (useEffect)
-    const sendEmail = async () => {
-      try {
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_BASE_URL}/api/send`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              to: userEmail,
-              firstName: name,
-              type: "payment",
-            }),
-          }
-        );
-
-        const data = await res.json();
-        console.log("Triggering email send:", { userEmail, name });
-
-        if (!res.ok) {
-          console.error("Failed to send email:", data.error);
-        }
-      } catch (error) {
-        console.error("Error sending email:", error);
-      }
-    };
-
-    sendEmail();
-  }, [userEmail, name]); // ✅ Only run once when component mounts
-
   const handleCheckBalance = async () => {
     if (!id) {
       console.error("Invoice ID is required.");
@@ -121,6 +87,27 @@ export default function PayInvoiceClient({
           correlationId: correlation_id,
           estimatedPaymentDate: estimated_payment_date,
         });
+
+        // Send email **ONLY after successful payment**
+        const emailResponse = await fetch(
+          `${process.env.NEXT_PUBLIC_BASE_URL}/api/send`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              to: userEmail,
+              firstName: name,
+              type: "payment",
+            }),
+          }
+        );
+
+        const emailData = await emailResponse.json();
+        console.log("Triggering email send:", { userEmail, name });
+
+        if (!emailResponse.ok) {
+          console.error("Failed to send email:", emailData.error);
+        }
       }
 
       alert("Payment successful!");
@@ -192,7 +179,7 @@ export default function PayInvoiceClient({
               <p>
                 <strong>Account Status:</strong>
               </p>
-            </div>
+            </div>{" "}
             <div>
               <p>{hmrcData.tfc_account_status}</p>
             </div>
@@ -200,17 +187,41 @@ export default function PayInvoiceClient({
               <p>
                 <strong>Government Top-Up:</strong>
               </p>
-            </div>
+            </div>{" "}
             <div>
               <p>£{hmrcData.government_top_up / 100}</p>
             </div>
             <div>
               <p>
-                <strong>Total Balance:</strong>
+                <strong>Top-Up Allowance:</strong>
               </p>
+            </div>{" "}
+            <div>
+              <p>£{hmrcData.top_up_allowance / 100}</p>
             </div>
             <div>
+              <p>
+                <strong>Paid In By You:</strong>
+              </p>
+            </div>{" "}
+            <div>
+              <p>£{hmrcData.paid_in_by_you / 100}</p>
+            </div>
+            <div>
+              <p>
+                <strong>Total Balance:</strong>
+              </p>
+            </div>{" "}
+            <div>
               <p>£{hmrcData.total_balance / 100}</p>
+            </div>
+            <div>
+              <p>
+                <strong>Cleared Funds:</strong>
+              </p>
+            </div>{" "}
+            <div>
+              <p>£{hmrcData.cleared_funds / 100}</p>
             </div>
           </div>
 
