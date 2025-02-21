@@ -22,7 +22,7 @@ export async function POST(req: Request) {
         emailTemplate = KojaVerificationEmail({ firstName });
         subject = 'Thanks for registering!';
         break;
-      case 'password-reset':
+      case 'payment':
         emailTemplate = KojaPaymentEmail({ firstName, });
         subject = 'Your payment has been created';
         break;
