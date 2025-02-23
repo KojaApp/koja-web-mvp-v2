@@ -7,7 +7,7 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(req: Request) {
   try {
-    const { to, firstName, type, extraData } = await req.json();
+    const { to, firstName, paymentReference, paymentDate, type, extraData } = await req.json();
 
     if (!to || !firstName || !type) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -23,7 +23,7 @@ export async function POST(req: Request) {
         subject = 'Thanks for registering!';
         break;
       case 'payment':
-        emailTemplate = KojaPaymentEmail({ firstName, });
+        emailTemplate = KojaPaymentEmail({ firstName, paymentReference, paymentDate  });
         subject = 'Your payment has been created';
         break;
       default:
