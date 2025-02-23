@@ -179,6 +179,20 @@ export async function addInvoice(prevState: string | null, formData: FormData) {
   redirect('/dashboard/invoices');
 }
 
+export async function updateInvoiceStatus(invoiceId: string) {
+  try {
+    await sql`
+      UPDATE invoices 
+      SET status = 'paid'
+      WHERE invoice_id = ${invoiceId};
+    `;
+    return { success: true };
+  } catch (error) {
+    console.error("Database Error:", error);
+    return { success: false, error: "Failed to update invoice status" };
+  }
+}
+
 export async function addChild(prevState: string | null, formData: FormData) {
   const validatedFields = AddingChild.safeParse({
     name: formData.get('name'),

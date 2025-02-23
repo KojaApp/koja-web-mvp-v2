@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { formatDateToLocal } from "@/app/lib/utils";
 import { opensans } from "@/app/ui/fonts";
 import { AddFunds } from "@/app/ui/invoices/buttons";
+import { sql } from "@vercel/postgres";
+import { updateInvoiceStatus } from "@/app/lib/actions";
 
 export default function PayInvoiceClient({
   searchParams,
@@ -87,6 +89,12 @@ export default function PayInvoiceClient({
           correlationId: correlation_id,
           estimatedPaymentDate: estimated_payment_date,
         });
+
+        // ✅ Call the server action to update the invoice status
+        const updateResponse = await updateInvoiceStatus(id);
+        if (!updateResponse.success) {
+          console.error("Failed to update invoice:", updateResponse.error);
+        }
 
         // Send email **ONLY after successful payment**
         const emailResponse = await fetch(
