@@ -116,7 +116,7 @@ const h1 = {
   fontWeight: "bold",
   margin: "40px 0",
   padding: "0",
-  textAlign: "center",
+  Align: "center",
 };
 
 const link = {
