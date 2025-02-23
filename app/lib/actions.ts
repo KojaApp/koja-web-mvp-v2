@@ -6,10 +6,9 @@ import {v4 as uuidv4} from "uuid"
 import z from 'zod';
 import { sql } from '@vercel/postgres';
 import { redirect } from 'next/navigation';
-import { getSession } from 'next-auth/react';
-import NextAuth from "next-auth"
 import { AuthError } from 'next-auth';
 import { auth } from "@/auth";
+
 
 const RegisterUser = z.object({
   name: z.string({
@@ -64,39 +63,54 @@ export async function register(
   prevState: string | null,
   formData: FormData,
 ) {
-
   const validatedFields = RegisterUser.safeParse({
     name: formData.get('name'),
     email: formData.get('email'),
     password: formData.get('password'),
     confirmPassword: formData.get('confirm-password'),
-  })
+  });
 
-  // If form validation fails, return errors early. Otherwise, continue.
   if (!validatedFields.success) {
-    return "Missing Fields. Failed to Create Account."
+    return "Missing Fields. Failed to Create Account.";
   }
 
-  const { name, email, password, confirmPassword } = validatedFields.data
+  const { name, email, password, confirmPassword } = validatedFields.data;
 
-  // Check if passwords match
   if (password !== confirmPassword) {
-    return "Passwords don't match."
+    return "Passwords don't match.";
   }
 
-  const hashedPassword = await bcrypt.hash(password, 10)
-  const id = uuidv4()
+  const hashedPassword = await bcrypt.hash(password, 10);
+  const id = uuidv4();
 
   try {
     await sql`
       INSERT INTO users (id, name, email, password)
       VALUES (${id}, ${name}, ${email}, ${hashedPassword})
-    `
+    `;
+
   } catch (error) {
-    return "Database Error: Failed to Create Account."
+    console.error('Registration Error:', error);
+    return "Database Error: Failed to Create Account.";
   }
 
-  redirect('/dashboard/add-child')
+    // ✅ Call the email API route asynchronously
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/send`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ to: email, firstName: name, type: 'registration', }),
+    });
+
+    const data = await res.json();
+    console.log('Email API Response:', data); // Debugging
+
+    if (!res.ok) {
+      console.error('Failed to send email:', data.error);
+    }
+
+
+
+  redirect('/dashboard/add-child');
 }
 
  
@@ -163,6 +177,20 @@ export async function addInvoice(prevState: string | null, formData: FormData) {
   }
 
   redirect('/dashboard/invoices');
+}
+
+export async function updateInvoiceStatus(invoiceId: string) {
+  try {
+    await sql`
+      UPDATE invoices 
+      SET status = 'paid'
+      WHERE invoice_id = ${invoiceId};
+    `;
+    return { success: true };
+  } catch (error) {
+    console.error("Database Error:", error);
+    return { success: false, error: "Failed to update invoice status" };
+  }
 }
 
 export async function addChild(prevState: string | null, formData: FormData) {

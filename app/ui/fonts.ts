@@ -1,11 +1,11 @@
-import { Merriweather, Montserrat } from 'next/font/google';
+import { Merriweather, Open_Sans } from 'next/font/google';
  
 export const merriweather = Merriweather({
     subsets: ['latin'],
     weight: '300'
 });
- 
-export const montserrat = Montserrat({
+
+export const opensans = Open_Sans ({
     subsets: ['latin'],
     weight: '400'
 });

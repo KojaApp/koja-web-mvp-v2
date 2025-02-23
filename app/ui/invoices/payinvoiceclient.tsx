@@ -1,25 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { formatDateToLocal } from "@/app/lib/utils";
-import { montserrat } from "@/app/ui/fonts";
+import { opensans } from "@/app/ui/fonts";
 import { AddFunds } from "@/app/ui/invoices/buttons";
+import { sql } from "@vercel/postgres";
+import { updateInvoiceStatus } from "@/app/lib/actions";
 
 export default function PayInvoiceClient({
   searchParams,
+  userEmail,
 }: {
-  searchParams: { [key: string]: string | undefined };
+  searchParams: Record<string, string | undefined>;
+  userEmail: string;
 }) {
-  // Extract and process values safely
-  const id = searchParams.id ?? null;
-  const name = searchParams.name ?? null;
-  const amount = searchParams.amount ? parseFloat(searchParams.amount) : 0; // Ensure a number
-  const rawDate = searchParams.date ?? null;
-  const date = rawDate ? decodeURIComponent(rawDate) : null;
-
-  // Debugging log
-  console.log("Inside PayInvoiceClient:", { id, name, amount, date });
-
   const [hmrcData, setHmrcData] = useState<any | null>(null);
   const [paymentDetails, setPaymentDetails] = useState<{
     paymentReference?: string;
@@ -27,6 +21,13 @@ export default function PayInvoiceClient({
     estimatedPaymentDate?: string;
   }>({});
   const [error, setError] = useState<string | null>(null);
+
+  // Extract and process values safely
+  const id = searchParams.id ?? null;
+  const name = searchParams.name ?? "";
+  const amount = searchParams.amount ? parseFloat(searchParams.amount) : 0; // Ensure a number
+  const rawDate = searchParams.date ?? null;
+  const date = rawDate ? decodeURIComponent(rawDate) : null;
 
   const handleCheckBalance = async () => {
     if (!id) {
@@ -88,6 +89,35 @@ export default function PayInvoiceClient({
           correlationId: correlation_id,
           estimatedPaymentDate: estimated_payment_date,
         });
+
+        // ✅ Call the server action to update the invoice status
+        const updateResponse = await updateInvoiceStatus(id);
+        if (!updateResponse.success) {
+          console.error("Failed to update invoice:", updateResponse.error);
+        }
+
+        // Send email **ONLY after successful payment**
+        const emailResponse = await fetch(
+          `${process.env.NEXT_PUBLIC_BASE_URL}/api/send`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              to: userEmail,
+              firstName: name,
+              type: "payment",
+              paymentReference: payment_reference,
+              paymentDate: estimated_payment_date,
+            }),
+          }
+        );
+
+        const emailData = await emailResponse.json();
+        console.log("Triggering email send:", { userEmail, name });
+
+        if (!emailResponse.ok) {
+          console.error("Failed to send email:", emailData.error);
+        }
       }
 
       alert("Payment successful!");
@@ -100,7 +130,7 @@ export default function PayInvoiceClient({
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
       <header className="mb-6">
-        <h1 className={`${montserrat.className} text-2xl font-semibold`}>
+        <h1 className={`${opensans.className} text-2xl font-semibold`}>
           Pay Invoice
         </h1>
         <p className="text-sm text-gray-500">
