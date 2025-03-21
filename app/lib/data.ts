@@ -2,6 +2,7 @@ import { sql } from '@vercel/postgres';
 import {
   ChildField,
   CustomerField,
+  OfferField,
   CustomersTableType,
   InvoiceForm,
   InvoicesTable,
@@ -141,6 +142,16 @@ export function filterInvoices(invoices: any[], query: string) {
   });
 }
 
+export function filterOffers(offers: any[], query: string) {
+  return offers.filter((offers) => {
+    return (
+      offers.id.toString().includes(query) ||
+      offers.description.toLowerCase().includes(query.toLowerCase()) ||
+      offers.supplier.toLowerCase().includes(query.toLowerCase())
+    );
+  });
+}
+
 export async function fetchInvoiceById(id: string) {
   try {
     const data = await sql<InvoiceForm>`
@@ -181,6 +192,31 @@ export async function fetchCustomers() {
   } catch (err) {
     console.error('Database Error:', err);
     throw new Error('Failed to fetch all customers.');
+  }
+}
+
+export async function fetchOffers() {
+  try {
+    const data = await sql<OfferField>`
+      SELECT
+        id,
+        supplier,
+        description,
+        discount,
+        image_url,
+        offer_url,
+        image_alt
+      FROM offers
+      ORDER BY discount DESC
+    `;
+
+
+console.log("Fetched Offers:", data.rows); // Debugging output
+
+    return data.rows;
+  } catch (err) {
+    console.error("Database Error:", err);
+    throw new Error("Failed to fetch all offers.");
   }
 }
 

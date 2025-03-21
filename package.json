@@ -5,7 +5,8 @@
     "dev": "next dev --turbopack",
     "start": "next start",
     "lint": "next lint",
-    "email": "email dev --dir ./emails-templates"
+    "email": "email dev --dir ./emails-templates",
+    "cypress:open": "cypress open"
   },
   "dependencies": {
     "@auth/core": "^0.37.4",
@@ -37,6 +38,7 @@
     "@types/bcrypt": "^5.0.2",
     "@types/node": "22.10.1",
     "@types/react": "19.0.0",
-    "@types/react-dom": "19.0.0"
+    "@types/react-dom": "19.0.0",
+    "cypress": "^14.2.0"
   }
 }
