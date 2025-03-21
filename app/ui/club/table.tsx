@@ -1,6 +1,8 @@
 import { fetchOffers } from "@/app/lib/data";
 import { filterOffers } from "@/app/lib/data";
 import Image from "next/image";
+import Link from "next/link";
+import React from "react";
 
 export default async function OfferTable({
   query,
@@ -46,7 +48,7 @@ export default async function OfferTable({
 
                     {/* Button - Ensures proper width */}
                     <button className="mt-2 min-w-[140px] rounded bg-[#F76C6C] px-6 py-2 text-white">
-                      Go to deal
+                      <Link href={offer.offer_url}></Link>Go to deal
                     </button>
                   </div>
                 </div>
@@ -83,7 +85,9 @@ export default async function OfferTable({
                   <td className="py-4 px-6 w-[160px] text-right">
                     {/* Button - Fixed width to prevent text wrapping */}
                     <button className="min-w-[140px] rounded bg-[#F76C6C] px-6 py-2 text-white">
-                      Go to deal
+                      <Link href={offer.offer_url} target="_blank ">
+                        Go to deal
+                      </Link>
                     </button>
                   </td>
                 </tr>
