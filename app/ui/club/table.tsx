@@ -45,8 +45,8 @@ export default async function OfferTable({
                     <p className="text-sm text-gray-600">{offer.description}</p>
 
                     {/* Button - Ensures proper width */}
-                    <button className="mt-2 min-w-[140px] rounded bg-blue-600 px-6 py-2 text-white">
-                      View Deal
+                    <button className="mt-2 min-w-[140px] rounded bg-[#F76C6C] px-6 py-2 text-white">
+                      Go to deal
                     </button>
                   </div>
                 </div>
@@ -82,7 +82,7 @@ export default async function OfferTable({
                   </td>
                   <td className="py-4 px-6 w-[160px] text-right">
                     {/* Button - Fixed width to prevent text wrapping */}
-                    <button className="min-w-[140px] rounded bg-blue-600 px-6 py-2 text-white">
+                    <button className="min-w-[140px] rounded bg-[#F76C6C] px-6 py-2 text-white">
                       Go to deal
                     </button>
                   </td>
