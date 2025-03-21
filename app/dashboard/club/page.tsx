@@ -1,6 +1,6 @@
 import Pagination from "@/app/ui/invoices/pagination";
 import Search from "@/app/ui/search";
-import Table from "@/app/ui/invoices/table";
+import OfferTable from "@/app/ui/club/table";
 import { opensans } from "@/app/ui/fonts";
 import { OfferTableSkeleton } from "@/app/ui/skeletons";
 import { Suspense } from "react";
@@ -25,7 +25,7 @@ export default async function Page(props: {
       </div>
       {
         <Suspense key={query + currentPage} fallback={<OfferTableSkeleton />}>
-          <Table query={query} currentPage={currentPage} />
+          <OfferTable query={query} currentPage={currentPage} />
         </Suspense>
       }
       <div className="mt-5 flex w-full justify-center">

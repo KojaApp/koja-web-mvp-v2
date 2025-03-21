@@ -92,6 +92,15 @@ export type CustomerField = {
   name: string;
 };
 
+export type OfferField = {
+  id: string;
+  supplier: string;
+  description: string;
+  discount: string;
+  image_url: string;
+  offer_url: string;
+}
+
 export type ChildField = {
   child_id: string;
   child_name: string;
