@@ -5,8 +5,14 @@ const nextConfig: NextConfig = {
     ppr: 'incremental',
   },
   images: {
-    domains: ['upload.wikimedia.org'], // Add the domain here
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "*", // Allow images from all domains
+      },
+    ],
   },
+  
 };
 
 
