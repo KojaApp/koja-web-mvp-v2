@@ -69,8 +69,8 @@ export default async function OfferTable({
                     <Image
                       alt={offer.image_alt || "Offer image"}
                       src={offer.image_url}
-                      width={250}
-                      height={250}
+                      width={225}
+                      height={225}
                       className="rounded-md object-cover"
                     />
                   </td>
