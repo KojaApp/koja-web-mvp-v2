@@ -145,7 +145,7 @@ export function filterInvoices(invoices: any[], query: string) {
 export function filterOffers(offers: any[], query: string) {
   return offers.filter((offers) => {
     return (
-      offers.id.toString().includes(query) ||
+      offers.offer_id.toString().includes(query) ||
       offers.description.toLowerCase().includes(query.toLowerCase()) ||
       offers.supplier.toLowerCase().includes(query.toLowerCase())
     );
@@ -199,7 +199,7 @@ export async function fetchOffers() {
   try {
     const data = await sql<OfferField>`
       SELECT
-        id,
+        offer_id,
         supplier,
         description,
         discount,

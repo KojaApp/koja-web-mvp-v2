@@ -25,7 +25,7 @@ export default async function OfferTable({
           <div className="md:hidden">
             {filteredOffers?.map((offer) => (
               <div
-                key={offer.id}
+                key={offer.offer_id}
                 className="mb-4 w-full rounded-md bg-white p-4 shadow-md"
               >
                 <div className="flex gap-4">
@@ -61,7 +61,7 @@ export default async function OfferTable({
             <tbody className="bg-white">
               {filteredOffers?.map((offer) => (
                 <tr
-                  key={offer.id}
+                  key={offer.offer_id}
                   className="border-b last-of-type:border-none"
                 >
                   <td className="py-4 px-6 w-1/3">
@@ -69,8 +69,8 @@ export default async function OfferTable({
                     <Image
                       alt={offer.image_alt || "Offer image"}
                       src={offer.image_url}
-                      width={150}
-                      height={150}
+                      width={225}
+                      height={225}
                       className="rounded-md object-cover"
                     />
                   </td>
